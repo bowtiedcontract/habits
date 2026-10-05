@@ -19,6 +19,47 @@ const STATUS = {
   planned: { label: "Still open", className: "status-open" },
 };
 
+const HABIT_TONE = {
+  "no-smoking": "tone-amber",
+  "no-vaping": "tone-sky",
+  "no-alcohol": "tone-teal",
+  "no-fap": "tone-rose",
+  caffeine: "tone-coffee",
+  sweets: "tone-plum",
+};
+
+const QUIT_ICON = {
+  "no-smoking": "flame",
+  "no-vaping": "cloud",
+  "no-alcohol": "glass",
+  "no-fap": "shield",
+  caffeine: "mug",
+  sweets: "candy",
+};
+
+const ICON_PATHS = {
+  book: "M4 19.5A2.5 2.5 0 0 1 6.5 17H20M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z",
+  sun: "M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4",
+  moon: "M21 14.5A8.5 8.5 0 1 1 9.5 3 7 7 0 0 0 21 14.5z",
+  trend: "M3 17l6-6 4 4 7-8M15 7h6v6",
+  bed: "M3 19V9M3 15h18v4M21 19V15M7 15v-2a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v2",
+  pill: "M9 15l6-6M8.5 8.5a4 4 0 0 1 5.7-5.7l5 5a4 4 0 0 1-5.7 5.7z",
+  run: "M15 6.2a1.6 1.6 0 1 0 0-3.2 1.6 1.6 0 0 0 0 3.2zM4 20l3.2-5.2 2.4 1.6 2-3.4L16 16M8.5 22l1.8-4M14.5 22l-1.4-3.2M8 9.5l2.4 2.2 1.8-1.6 3.4.8",
+  bolt: "M13 2L4 14h7l-1 8 9-12h-7l1-8z",
+  mountain: "M3 20l6.5-11 3.2 5.2L16 10l5 10z",
+  core: "M12 3c1.8 2.4 2.2 4.2.6 6.2 2 .8 3.6 2.4 3.6 5.2a4.2 4.2 0 0 1-8.4 0c0-2.8 1.6-4.4 3.6-5.2C9.8 7.2 10.2 5.4 12 3z",
+  lotus: "M12 20c3.2-3.2 4-6.4.2-10.2C8 13.6 8.8 16.8 12 20zM12 20C7 18 4.5 14 6.2 10.2 9 12.4 10.6 15.6 12 20zM12 20c5-2 7.5-6 5.8-9.8-2.8 2.2-4.4 5.4-5.8 9.8z",
+  flame: "M12 22a6.5 6.5 0 0 0 4.8-10.8C15.2 8.6 14 7 14 4c-2.2 2.2-3 4.2-3 6.2 0 1-.4 1.6-1.2 2.2C8.2 10.6 8 8.4 8.6 6 6.4 8 5 11 5 14.2A7 7 0 0 0 12 22z",
+  cloud: "M7 18h10a4 4 0 0 0 .5-8 5.5 5.5 0 0 0-10.6 1.6A3.5 3.5 0 0 0 7 18z",
+  glass: "M8 3h8l-1.2 7.2a4 4 0 0 1-7.6 0L8 3zM12 14.2V19M9 21h6",
+  shield: "M12 3l7 3v6c0 4.2-2.8 7.2-7 9-4.2-1.8-7-4.8-7-9V6z",
+  mug: "M5 8h10v5a4 4 0 0 1-4 4H8a3 3 0 0 1-3-3V8zM15 9h2a2.5 2.5 0 0 1 0 5h-2M8 3.5c.4 1 .4 1.2.4 2M11 3.5c.4 1 .4 1.2.4 2",
+  candy: "M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM9 9L5 5M15 15l4 4M9 15l-4 4M15 9l4-4",
+  check: "M5 12.5l4.2 4.2L19 7",
+};
+
+const TONE_FALLBACK = ["tone-amber", "tone-sky", "tone-teal", "tone-rose", "tone-coffee", "tone-plum"];
+
 const state = {
   timers: [],
 };
@@ -103,7 +144,7 @@ function setTimerStart(id, iso, { override }) {
   card.querySelector("[data-since]").textContent = `since ${formatBerlinStamp(iso)}`;
   const tag = card.querySelector("[data-source]");
   tag.hidden = !override;
-  tag.textContent = "Your date";
+  tag.textContent = "This browser";
   const resetButton = card.querySelector("[data-reset]");
   resetButton.hidden = !override;
   paintElapsed(timer);
@@ -144,20 +185,44 @@ function renderQuit(payload) {
     return;
   }
 
-  for (const timer of state.timers) {
+  state.timers.forEach((timer, index) => {
+    timer.tone = HABIT_TONE[timer.id] || TONE_FALLBACK[index % TONE_FALLBACK.length];
     grid.append(renderQuitCard(timer));
     paintElapsed(timer);
-  }
+  });
   updateResetAll();
 }
 
+function restartIcon() {
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("viewBox", "0 0 24 24");
+  svg.setAttribute("width", "18");
+  svg.setAttribute("height", "18");
+  svg.setAttribute("aria-hidden", "true");
+  svg.setAttribute("class", "btn-icon");
+  const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  path.setAttribute("fill", "none");
+  path.setAttribute("stroke", "currentColor");
+  path.setAttribute("stroke-width", "2.2");
+  path.setAttribute("stroke-linecap", "round");
+  path.setAttribute("stroke-linejoin", "round");
+  path.setAttribute("d", "M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8M3 3v5h5");
+  svg.append(path);
+  return svg;
+}
+
 function renderQuitCard(timer) {
-  const card = el("article", "quit-card");
+  const card = el("article", `quit-card ${timer.tone || "tone-teal"}`);
   card.dataset.timer = timer.id;
 
   const top = el("div", "quit-card-top");
-  top.append(el("h3", null, timer.label));
-  const tag = el("span", "source-tag", "Your date");
+  const title = el("h3");
+  const glyph = el("span", "quit-glyph");
+  glyph.setAttribute("aria-hidden", "true");
+  glyph.append(svgIcon(QUIT_ICON[timer.id] || "shield"));
+  title.append(glyph, document.createTextNode(timer.label));
+  top.append(title);
+  const tag = el("span", "source-tag", "This browser");
   tag.dataset.source = "";
   tag.hidden = !timer.override;
   top.append(tag);
@@ -183,11 +248,8 @@ function renderQuitCard(timer) {
   since.dataset.since = "";
   card.append(since);
 
-  const editButton = el("button", "text-btn", "Edit start");
-  editButton.type = "button";
-  card.append(editButton);
-
   const form = el("form", "edit-form");
+  form.id = `edit-${timer.id}`;
   form.hidden = true;
   const label = el("label", "field-label", "Start in Europe/Berlin");
   const input = document.createElement("input");
@@ -198,31 +260,51 @@ function renderQuitCard(timer) {
   label.append(input);
   form.append(label);
 
+  const formActions = el("div", "edit-actions");
+  const save = el("button", "btn btn-secondary", "Save");
+  save.type = "submit";
+  const cancel = el("button", "btn btn-secondary", "Cancel");
+  cancel.type = "button";
+  formActions.append(save, cancel);
+  form.append(formActions);
+  card.append(form);
+
   const error = el("p", "form-error");
   error.hidden = true;
-  form.append(error);
+  card.append(error);
 
-  const actions = el("div", "edit-actions");
-  const save = el("button", "btn", "Save");
-  save.type = "submit";
-  const restart = el("button", "btn btn-quiet", "Restart from now");
+  const actions = el("div", "quit-actions");
+  actions.setAttribute("role", "group");
+  actions.setAttribute("aria-label", `${timer.label} actions`);
+
+  const restart = el("button", "btn btn-restart");
   restart.type = "button";
-  const reset = el("button", "btn btn-quiet", "Use file default");
+  restart.setAttribute("aria-label", `Restart ${timer.label} from now`);
+  restart.append(restartIcon(), el("span", null, "Restart from now"));
+
+  const secondary = el("div", "quit-secondary");
+  const editButton = el("button", "btn btn-secondary", "Edit start");
+  editButton.type = "button";
+  editButton.setAttribute("aria-expanded", "false");
+  editButton.setAttribute("aria-controls", form.id);
+  const reset = el("button", "btn btn-secondary", "Use file default");
   reset.type = "button";
   reset.dataset.reset = "";
   reset.hidden = !timer.override;
-  const cancel = el("button", "btn btn-quiet", "Cancel");
-  cancel.type = "button";
-  actions.append(save, restart, reset, cancel);
-  form.append(actions);
-  card.append(form);
+  secondary.append(editButton, reset);
+  actions.append(restart, secondary);
+  card.append(actions);
 
   editButton.addEventListener("click", () => {
-    input.value = toDatetimeLocalValue(timer.start);
-    error.hidden = true;
-    form.hidden = false;
-    editButton.hidden = true;
-    input.focus();
+    if (form.hidden) {
+      input.value = toDatetimeLocalValue(timer.start);
+      error.hidden = true;
+      form.hidden = false;
+      editButton.setAttribute("aria-expanded", "true");
+      input.focus();
+      return;
+    }
+    closeEditor();
   });
 
   cancel.addEventListener("click", () => closeEditor());
@@ -269,10 +351,138 @@ function renderQuitCard(timer) {
 
   function closeEditor() {
     form.hidden = true;
-    editButton.hidden = false;
+    editButton.setAttribute("aria-expanded", "false");
     error.hidden = true;
   }
 
+  return card;
+}
+
+function svgIcon(name) {
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("viewBox", "0 0 24 24");
+  svg.setAttribute("width", "22");
+  svg.setAttribute("height", "22");
+  svg.setAttribute("aria-hidden", "true");
+  svg.setAttribute("class", "icon");
+  const raw = ICON_PATHS[name] || ICON_PATHS.check;
+  for (const d of Array.isArray(raw) ? raw : [raw]) {
+    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    path.setAttribute("d", d);
+    path.setAttribute("fill", "none");
+    path.setAttribute("stroke", "currentColor");
+    path.setAttribute("stroke-width", "1.8");
+    path.setAttribute("stroke-linecap", "round");
+    path.setAttribute("stroke-linejoin", "round");
+    svg.append(path);
+  }
+  return svg;
+}
+
+function iconNameFor(item) {
+  const key = `${item?.id || ""} ${item?.name || ""}`.toLowerCase();
+  if (key.includes("german") || key.includes("anki") || key.includes("pimsleur")) return "book";
+  if (key.includes("bed")) return "bed";
+  if (key.includes("morning")) return "sun";
+  if (key.includes("evening")) return "moon";
+  if (key.includes("vitamin")) return "pill";
+  if (key.includes("invest")) return "trend";
+  if (key.includes("couch") || key.includes("5k") || key.includes("run")) return "run";
+  if (key.includes("sprint")) return "bolt";
+  if (key.includes("boulder") || key.includes("climb")) return "mountain";
+  if (key.includes("abs") || key.includes("forearm") || key.includes("core")) return "core";
+  if (key.includes("yoga") || key.includes("stretch")) return "lotus";
+  if (key.includes("smok")) return "flame";
+  if (key.includes("vap")) return "cloud";
+  if (key.includes("alcohol")) return "glass";
+  if (key.includes("caffeine") || key.includes("coffee")) return "mug";
+  if (key.includes("sweet")) return "candy";
+  return "check";
+}
+
+function meterWidth(status) {
+  if (status === "completed" || status === "missed" || status === "skipped") return 100;
+  return 16;
+}
+
+const CARD_STATE = {
+  completed: "is-done",
+  missed: "is-missed",
+  skipped: "is-skipped",
+  planned: "is-open",
+};
+
+function habitCard(item) {
+  const info = statusInfo(item.status);
+  const card = el("article", `habit-card ${CARD_STATE[item.status] || "is-open"}`);
+  const iconWrap = el("div", "habit-icon");
+  iconWrap.append(svgIcon(iconNameFor(item)));
+  const copy = el("div", "habit-copy");
+  const top = el("div", "habit-card-top");
+  top.append(el("h3", "habit-name", item.name || item.id || "Habit"));
+  top.append(statusChip(item.status));
+  copy.append(top);
+  if (item.note) copy.append(el("p", "habit-note", item.note));
+  if (item.planned === false) copy.append(el("p", "plan-flag", "Not on plan"));
+  if (item.when) copy.append(el("p", "habit-when", item.when));
+  const meter = el("div", "meter");
+  meter.setAttribute("role", "img");
+  meter.setAttribute("aria-label", `${item.name || "Habit"}: ${info.label}`);
+  const track = el("div", "meter-track");
+  const fill = el("div", `meter-fill ${info.className}`);
+  fill.style.width = `${meterWidth(item.status)}%`;
+  track.append(fill);
+  meter.append(track);
+  card.append(iconWrap, copy, meter);
+  return card;
+}
+
+function statusChip(status) {
+  const info = statusInfo(status);
+  return el("p", `status chip ${info.className}`, info.label);
+}
+
+function renderCountChips(counts) {
+  if (!counts) return null;
+  const row = el("div", "count-chips");
+  const specs = [
+    ["completed", "completed", "status-done"],
+    ["missed", "missed", "status-missed"],
+    ["skipped", "skipped", "status-skipped"],
+    ["open", "still open", "status-open"],
+  ];
+  let any = false;
+  for (const [key, word, className] of specs) {
+    if (!counts[key]) continue;
+    any = true;
+    row.append(el("span", `chip ${className}`, `${counts[key]} ${word}`));
+  }
+  return any ? row : null;
+}
+
+function renderScore(percent, counts) {
+  const card = el("div", "score-card");
+  const score = el("p", "percent");
+  score.append(el("span", "percent-num", percent == null ? "—" : `${percent}%`));
+  score.append(el("span", "percent-label", "done"));
+  card.append(score);
+  if (percent != null) {
+    const bounded = Math.max(0, Math.min(100, percent));
+    const bar = el("div", "progress");
+    bar.setAttribute("role", "progressbar");
+    bar.setAttribute("aria-valuemin", "0");
+    bar.setAttribute("aria-valuemax", "100");
+    bar.setAttribute("aria-valuenow", String(bounded));
+    bar.setAttribute("aria-label", "Percent done this week");
+    const track = el("div", "progress-track");
+    const fill = el("div", "progress-fill");
+    fill.style.width = `${bounded}%`;
+    track.append(fill);
+    bar.append(track);
+    card.append(bar);
+  }
+  const chips = renderCountChips(counts);
+  if (chips) card.append(chips);
   return card;
 }
 
@@ -280,7 +490,7 @@ function renderToday(day) {
   const root = $("#today-body");
   root.replaceChildren();
   const dateLabel = formatCalendarDay(day.date);
-  $("#today-when").textContent = dateLabel ? `Today · ${dateLabel}` : "Today";
+  $("#today-when").textContent = dateLabel || "Today";
 
   const todayISO = berlinDateISO(new Date());
   if (day.date && day.date !== todayISO) {
@@ -298,35 +508,9 @@ function renderToday(day) {
     return;
   }
 
-  const list = el("div", "habit-list");
-  for (const item of items) {
-    const row = el("div", "habit-row");
-    const name = el("p", "habit-name", item.name || item.id || "Habit");
-    if (item.note) {
-      const note = el("span", "habit-note", item.note);
-      name.append(note);
-    }
-    const planned = el(
-      "p",
-      "plan-flag",
-      item.planned === false ? "Not on plan" : "Planned"
-    );
-    const info = statusInfo(item.status);
-    const actual = el("p", `status ${info.className}`, info.label);
-    row.append(name, planned, actual);
-    list.append(row);
-  }
+  const list = el("div", "habit-grid");
+  for (const item of items) list.append(habitCard(item));
   root.append(list);
-}
-
-function countLine(counts) {
-  if (!counts) return "";
-  const parts = [];
-  if (counts.completed) parts.push(`${counts.completed} completed`);
-  if (counts.missed) parts.push(`${counts.missed} missed`);
-  if (counts.skipped) parts.push(`${counts.skipped} skipped`);
-  if (counts.open) parts.push(`${counts.open} still open`);
-  return parts.join(" · ");
 }
 
 function renderNameList(items, emptyText) {
@@ -349,7 +533,7 @@ function renderWeek(week) {
   root.replaceChildren();
   const start = formatCalendarDay(week.weekStart);
   const end = formatCalendarDay(week.weekEnd);
-  $("#week-when").textContent = start && end ? `This week · ${start} – ${end}` : "This week";
+  $("#week-when").textContent = start && end ? `${start} – ${end}` : "This week";
 
   const todayISO = berlinDateISO(new Date());
   if (week.weekStart && week.weekEnd && (todayISO < week.weekStart || todayISO > week.weekEnd)) {
@@ -369,19 +553,13 @@ function renderWeek(week) {
         ? Math.round((week.counts.completed / week.counts.planned) * 100)
         : null;
 
-  const score = el("p", "percent");
-  score.append(el("span", "percent-num", percent == null ? "—" : `${percent}%`));
-  score.append(el("span", "percent-label", "done"));
-  root.append(score);
-
-  const counts = countLine(week.counts);
-  if (counts) root.append(el("p", "counts", counts));
+  root.append(renderScore(percent, week.counts));
 
   const split = el("div", "split");
-  const doneCol = el("div");
+  const doneCol = el("div", "panel panel-block");
   doneCol.append(el("h3", "subhead", "Completed"));
   doneCol.append(renderNameList(week.completed, "None yet"));
-  const missedCol = el("div");
+  const missedCol = el("div", "panel panel-block");
   missedCol.append(el("h3", "subhead", "Missed"));
   missedCol.append(renderNameList(week.missed, "None"));
   split.append(doneCol, missedCol);
@@ -397,16 +575,81 @@ function renderWeek(week) {
   const workouts = Array.isArray(week.workouts) ? week.workouts : [];
   if (workouts.length) {
     root.append(el("h3", "subhead workouts-head", "Weekly workouts"));
-    const list = el("div", "habit-list");
-    for (const workout of workouts) {
-      const row = el("div", "habit-row habit-row-two");
-      row.append(el("p", "habit-name", workout.name || workout.id || "Workout"));
-      const info = statusInfo(workout.status);
-      row.append(el("p", `status ${info.className}`, info.label));
-      list.append(row);
-    }
+    const list = el("div", "habit-grid");
+    for (const workout of workouts) list.append(habitCard(workout));
     root.append(list);
   }
+}
+
+function parseCount(value) {
+  const match = String(value ?? "").match(/-?\d+/);
+  return match ? Number(match[0]) : null;
+}
+
+function workoutTotals(stats) {
+  if (!Array.isArray(stats)) return null;
+  let done = null;
+  let planned = null;
+  for (const stat of stats) {
+    const label = String(stat.label || "");
+    const value = parseCount(stat.value);
+    if (value == null || value < 0) continue;
+    if (/done|complete/i.test(label)) done = value;
+    else if (/plan|remain|left|open/i.test(label)) planned = value;
+  }
+  if (done == null || planned == null) return null;
+  const total = done + planned;
+  if (total <= 0) return null;
+  return { done, total };
+}
+
+function renderRing(done, total) {
+  const ratio = Math.max(0, Math.min(1, done / total));
+  const radius = 52;
+  const circumference = 2 * Math.PI * radius;
+  const hero = el("div", "fitness-hero");
+  const wrap = el("div", "ring-wrap");
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("viewBox", "0 0 140 140");
+  svg.setAttribute("class", "ring");
+  svg.setAttribute("role", "img");
+  svg.setAttribute("aria-label", `${done} of ${total} workouts`);
+  const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+  const gradient = document.createElementNS("http://www.w3.org/2000/svg", "linearGradient");
+  gradient.setAttribute("id", "fitness-ring");
+  gradient.setAttribute("x1", "0");
+  gradient.setAttribute("y1", "0");
+  gradient.setAttribute("x2", "1");
+  gradient.setAttribute("y2", "1");
+  for (const [offset, color] of [["0%", "#7dffe1"], ["100%", "#8eb6ff"]]) {
+    const stop = document.createElementNS("http://www.w3.org/2000/svg", "stop");
+    stop.setAttribute("offset", offset);
+    stop.setAttribute("stop-color", color);
+    gradient.append(stop);
+  }
+  defs.append(gradient);
+  const track = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+  track.setAttribute("class", "ring-track");
+  track.setAttribute("cx", "70");
+  track.setAttribute("cy", "70");
+  track.setAttribute("r", String(radius));
+  const value = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+  value.setAttribute("class", "ring-value");
+  value.setAttribute("cx", "70");
+  value.setAttribute("cy", "70");
+  value.setAttribute("r", String(radius));
+  value.setAttribute("stroke-dasharray", `${(ratio * circumference).toFixed(2)} ${circumference.toFixed(2)}`);
+  svg.append(defs, track, value);
+  const center = el("div", "ring-center");
+  center.append(el("p", "ring-count", String(done)));
+  center.append(el("p", "ring-of", `of ${total}`));
+  wrap.append(svg, center);
+  const copy = el("div", "ring-copy");
+  copy.append(el("p", "ring-kicker", "This week"));
+  copy.append(el("p", "ring-title", `${done} of ${total} workouts`));
+  copy.append(el("p", "ring-note", "Done plus still planned. Logged sessions are below."));
+  hero.append(wrap, copy);
+  return hero;
 }
 
 function fitnessHasContent(fitness) {
@@ -435,7 +678,10 @@ function renderFitness(fitness) {
 
   if (fitness.sundayRecap) root.append(el("p", "recap", fitness.sundayRecap));
 
-  if (Array.isArray(fitness.stats) && fitness.stats.length) {
+  const totals = workoutTotals(fitness.stats);
+  if (totals) root.append(renderRing(totals.done, totals.total));
+
+  if (Array.isArray(fitness.stats) && fitness.stats.length && !totals) {
     const stats = el("div", "stat-row");
     for (const stat of fitness.stats) {
       const chip = el("div", "stat");
@@ -447,15 +693,17 @@ function renderFitness(fitness) {
   }
 
   if (Array.isArray(fitness.workouts) && fitness.workouts.length) {
-    const list = el("ul", "plain-list");
+    const list = el("div", "session-list");
     for (const workout of fitness.workouts) {
-      const li = el("li");
-      li.append(el("span", "item-name", workout.name || "Workout"));
-      const bits = [workout.date ? formatCalendarDay(workout.date) : "", workout.detail || ""]
-        .filter(Boolean)
-        .join(" · ");
-      if (bits) li.append(el("span", "item-when", bits));
-      list.append(li);
+      const card = el("article", "session-card");
+      const iconWrap = el("div", "habit-icon");
+      iconWrap.append(svgIcon(iconNameFor(workout)));
+      const copy = el("div", "habit-copy");
+      copy.append(el("h3", "habit-name", workout.name || "Workout"));
+      if (workout.date) copy.append(el("p", "habit-when", formatCalendarDay(workout.date)));
+      if (workout.detail) copy.append(el("p", "habit-note", workout.detail));
+      card.append(iconWrap, copy);
+      list.append(card);
     }
     root.append(list);
   }
