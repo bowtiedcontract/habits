@@ -31,7 +31,7 @@ Check the clock math with `node time.test.js`.
 
 ## What you see
 
-- **Quit timers.** Live elapsed time since each start, ticking every second. Starts live in [`data/quit-timers.json`](data/quit-timers.json).
+- **Quit timers.** Live elapsed time since each start, ticking every second. Each card has a **Restart from now** button. Starts default to [`data/quit-timers.json`](data/quit-timers.json). A restart or an edited date is saved only in that browser.
 - **Planned vs done.** Today’s habits from [`data/habits-day.json`](data/habits-day.json), then the week from [`data/habits-week.json`](data/habits-week.json): percent done, completed, missed, and weekly workouts.
 - **Fitness (from Fitness Bot).** Reads optional [`data/fitness.json`](data/fitness.json). Until that file exists, the section says the Sunday recap will land here.
 
@@ -48,7 +48,13 @@ The habit blocks ship with sample data (`"sample": true`) so the layout is visib
 | `caffeine` | Caffeine | 2026-10-01T05:43:00+02:00 |
 | `sweets` | Sweets | 2026-10-05T03:43:00+02:00 |
 
-**Edit or reset a start without a deploy.** On the card, **Edit start** saves a new `Europe/Berlin` date in this browser only. **Restart from now** does the same, using the current Berlin time. **Use file default** drops that override. **Reset all dates to the file** clears every override.
+**Restart a timer on the card.** Every quit card shows three controls, without opening a menu first:
+
+- **Restart from now** is the filled button. After you confirm, the streak start becomes the current Europe/Berlin time.
+- **Edit start** opens a date and time field. Save keeps that instant.
+- **Use file default** appears only when this browser already has a different start. It drops that override.
+
+The page states: “Resets save in this browser only (phone ≠ laptop).” A phone and a laptop do not share these dates. **Reset all dates to the file**, under the cards, clears every override in the browser you are using.
 
 Overrides are stored in `localStorage` under `habits.quitTimerOverrides`:
 
@@ -171,6 +177,8 @@ One Monday–Sunday week in `Europe/Berlin`. `weekStart` and `weekEnd` are inclu
 ## Fitness
 
 `data/fitness.json` is optional. If it is missing, or has no recap, stats, or workouts, the section keeps the placeholder sentence.
+
+When `stats` has one value whose label says done (or completed) and another whose label says planned, the page draws a ring: done of (done + still planned) workouts. For example, “Workouts done” `1` and “Still planned this week” `5` reads **1 of 6 workouts**. Any other stat shape stays as plain numbers. Each object in `workouts` is one session card. The JSON shape does not change.
 
 ```json
 {
