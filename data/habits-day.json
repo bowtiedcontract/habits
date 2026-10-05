@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "timezone": "Europe/Berlin",
+  "date": "2026-10-05",
+  "sample": true,
+  "updated": "2026-10-05T21:15:00+02:00",
+  "source": "sample",
+  "items": [
+    {
+      "id": "german",
+      "name": "German (Anki/Pimsleur)",
+      "planned": true,
+      "status": "completed"
+    },
+    {
+      "id": "vitamins-morning",
+      "name": "Morning vitamins",
+      "planned": true,
+      "status": "completed"
+    },
+    {
+      "id": "vitamins-evening",
+      "name": "Evening vitamins",
+      "planned": true,
+      "status": "skipped"
+    },
+    {
+      "id": "investing",
+      "name": "Investing check",
+      "planned": true,
+      "status": "missed"
+    },
+    {
+      "id": "bed",
+      "name": "Bed by 23:00",
+      "planned": true,
+      "status": "planned"
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "timezone": "Europe/Berlin",
+  "timers": [
+    {
+      "id": "no-smoking",
+      "label": "No Smoking",
+      "start": "2026-09-17T21:38:00+02:00"
+    },
+    {
+      "id": "no-vaping",
+      "label": "No Vaping",
+      "start": "2026-09-24T18:34:00+02:00"
+    },
+    {
+      "id": "no-alcohol",
+      "label": "No Alcohol",
+      "start": "2026-09-28T15:22:00+02:00"
+    },
+    {
+      "id": "no-fap",
+      "label": "No Fap",
+      "start": "2026-10-02T23:31:00+02:00"
+    },
+    {
+      "id": "caffeine",
+      "label": "Caffeine",
+      "start": "2026-10-01T05:43:00+02:00"
+    },
+    {
+      "id": "sweets",
+      "label": "Sweets",
+      "start": "2026-10-05T03:43:00+02:00"
+    }
+  ]
+}

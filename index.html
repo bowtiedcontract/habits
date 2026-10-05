@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#12141a">
+  <meta name="description" content="Habits dashboard: quit timers and planned versus done.">
+  <meta name="robots" content="noindex">
+  <title>Habits</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect fill='%2312141a' width='16' height='16'/%3E%3Ccircle fill='%239fd7b8' cx='8' cy='8' r='4'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+  <div class="wrap">
+    <header class="top">
+      <div>
+        <p class="eyebrow">Wiesbaden</p>
+        <h1>Habits</h1>
+      </div>
+      <div class="now">
+        <p id="now-date">—</p>
+        <p id="now-time" class="now-time">—</p>
+      </div>
+    </header>
+
+    <p id="sample-banner" class="banner" hidden>Sample habit data. Todo BOT will replace the day and week files. Quit timers below are live.</p>
+
+    <noscript><p class="error">This page needs JavaScript to load the timers and habit files.</p></noscript>
+
+    <section aria-labelledby="quit-heading">
+      <div class="section-head">
+        <h2 id="quit-heading">Quit timers</h2>
+        <p class="lede">Time since each start. Change a date here if it is wrong. Edits stay in this browser.</p>
+        <p id="quit-tz" class="lede" hidden></p>
+      </div>
+      <div id="quit-grid" class="quit-grid">Loading timers…</div>
+      <p class="section-tools"><button id="reset-all" class="text-btn" type="button" hidden>Reset all dates to the file</button></p>
+    </section>
+
+    <section aria-labelledby="today-heading">
+      <div class="section-head">
+        <p id="today-when" class="section-kicker">Today</p>
+        <h2 id="today-heading">Planned vs done</h2>
+        <p class="lede">What was planned, and what Todoist recorded. Tick habits in Todoist, not on this page.</p>
+      </div>
+      <div id="today-body"><p class="empty">Loading today…</p></div>
+    </section>
+
+    <section aria-labelledby="week-heading">
+      <div class="section-head">
+        <p id="week-when" class="section-kicker">This week</p>
+        <h2 id="week-heading">Week summary</h2>
+      </div>
+      <div id="week-body"><p class="empty">Loading the week…</p></div>
+    </section>
+
+    <section aria-labelledby="fitness-heading">
+      <div class="section-head">
+        <h2 id="fitness-heading">Fitness (from Fitness Bot)</h2>
+      </div>
+      <div id="fitness-body"><p class="empty">Loading fitness…</p></div>
+    </section>
+
+    <footer class="footer">
+      <p>Europe/Berlin. Public page: quit labels are visible to anyone with the link.</p>
+    </footer>
+  </div>
+</body>
+</html>
