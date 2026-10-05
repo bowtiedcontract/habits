@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "timezone": "Europe/Berlin",
+  "weekStart": "2026-10-05",
+  "weekEnd": "2026-10-11",
+  "sample": true,
+  "updated": "2026-10-05T21:15:00+02:00",
+  "source": "sample",
+  "percentDone": 40,
+  "counts": {
+    "planned": 10,
+    "completed": 4,
+    "skipped": 1,
+    "missed": 2,
+    "open": 3
+  },
+  "completed": [
+    {
+      "id": "german",
+      "name": "German (Anki/Pimsleur)",
+      "when": "Mon 5 Oct"
+    },
+    {
+      "id": "vitamins-morning",
+      "name": "Morning vitamins",
+      "when": "Mon 5 Oct"
+    },
+    {
+      "id": "couch-to-5k",
+      "name": "Couch to 5K",
+      "when": "This week"
+    },
+    {
+      "id": "abs-forearms",
+      "name": "Abs / forearms",
+      "when": "This week"
+    }
+  ],
+  "missed": [
+    {
+      "id": "investing",
+      "name": "Investing check",
+      "when": "Mon 5 Oct"
+    },
+    {
+      "id": "bouldering",
+      "name": "Bouldering",
+      "when": "This week"
+    }
+  ],
+  "skipped": [
+    {
+      "id": "vitamins-evening",
+      "name": "Evening vitamins",
+      "when": "Mon 5 Oct"
+    }
+  ],
+  "workouts": [
+    {
+      "id": "couch-to-5k",
+      "name": "Couch to 5K",
+      "status": "completed"
+    },
+    {
+      "id": "sprints",
+      "name": "Sprints",
+      "status": "planned"
+    },
+    {
+      "id": "bouldering",
+      "name": "Bouldering",
+      "status": "missed"
+    },
+    {
+      "id": "abs-forearms",
+      "name": "Abs / forearms",
+      "status": "completed"
+    },
+    {
+      "id": "yoga",
+      "name": "Yoga",
+      "status": "planned"
+    }
+  ]
+}
