@@ -2,15 +2,16 @@
   "schemaVersion": 1,
   "timezone": "Europe/Berlin",
   "date": "2026-10-05",
-  "sample": true,
-  "updated": "2026-10-05T21:15:00+02:00",
-  "source": "sample",
+  "sample": false,
+  "updated": "2026-10-05T22:14:00+02:00",
+  "source": "todoist",
   "items": [
     {
       "id": "german",
       "name": "German (Anki/Pimsleur)",
       "planned": true,
-      "status": "completed"
+      "status": "planned",
+      "note": "Pimsleur done; Anki still open"
     },
     {
       "id": "vitamins-morning",
@@ -22,13 +23,13 @@
       "id": "vitamins-evening",
       "name": "Evening vitamins",
       "planned": true,
-      "status": "skipped"
+      "status": "completed"
     },
     {
       "id": "investing",
       "name": "Investing check",
       "planned": true,
-      "status": "missed"
+      "status": "completed"
     },
     {
       "id": "bed",
