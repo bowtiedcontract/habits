@@ -3,7 +3,7 @@
   "timezone": "Europe/Berlin",
   "date": "2026-10-06",
   "sample": false,
-  "updated": "2026-10-06T07:30:00+02:00",
+  "updated": "2026-10-06T17:39:00+02:00",
   "source": "todoist",
   "items": [
     {
@@ -16,7 +16,7 @@
       "id": "vitamins-morning",
       "name": "Morning vitamins",
       "planned": true,
-      "status": "planned"
+      "status": "completed"
     },
     {
       "id": "vitamins-evening",
@@ -28,13 +28,7 @@
       "id": "investing",
       "name": "Investing check",
       "planned": true,
-      "status": "planned"
-    },
-    {
-      "id": "bed",
-      "name": "Bed by 23:00",
-      "planned": true,
-      "status": "planned"
+      "status": "completed"
     }
   ]
 }

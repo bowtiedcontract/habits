@@ -4,15 +4,15 @@
   "weekStart": "2026-10-05",
   "weekEnd": "2026-10-11",
   "sample": false,
-  "updated": "2026-10-06T07:30:00+02:00",
+  "updated": "2026-10-06T17:39:00+02:00",
   "source": "todoist",
-  "percentDone": 20,
+  "percentDone": 38,
   "counts": {
-    "planned": 15,
-    "completed": 3,
+    "planned": 13,
+    "completed": 5,
     "skipped": 0,
-    "missed": 3,
-    "open": 9
+    "missed": 2,
+    "open": 6
   },
   "completed": [
     {
@@ -29,6 +29,16 @@
       "id": "bouldering",
       "name": "Bouldering (Monday climb)",
       "when": "Mon 5 Oct"
+    },
+    {
+      "id": "vitamins-morning",
+      "name": "Morning vitamins",
+      "when": "Tue 6 Oct"
+    },
+    {
+      "id": "investing",
+      "name": "Investing check",
+      "when": "Tue 6 Oct"
     }
   ],
   "missed": [
@@ -40,11 +50,6 @@
     {
       "id": "investing",
       "name": "Investing check",
-      "when": "Mon 5 Oct"
-    },
-    {
-      "id": "bed",
-      "name": "Bed by 23:00",
       "when": "Mon 5 Oct"
     }
   ],
