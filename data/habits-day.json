@@ -1,35 +1,34 @@
 {
   "schemaVersion": 1,
   "timezone": "Europe/Berlin",
-  "date": "2026-10-05",
+  "date": "2026-10-06",
   "sample": false,
-  "updated": "2026-10-05T22:14:00+02:00",
+  "updated": "2026-10-06T07:30:00+02:00",
   "source": "todoist",
   "items": [
     {
       "id": "german",
-      "name": "German (Anki/Pimsleur)",
+      "name": "German (Anki + Pimsleur)",
       "planned": true,
-      "status": "planned",
-      "note": "Pimsleur done; Anki still open"
+      "status": "planned"
     },
     {
       "id": "vitamins-morning",
       "name": "Morning vitamins",
       "planned": true,
-      "status": "completed"
+      "status": "planned"
     },
     {
       "id": "vitamins-evening",
       "name": "Evening vitamins",
       "planned": true,
-      "status": "completed"
+      "status": "planned"
     },
     {
       "id": "investing",
       "name": "Investing check",
       "planned": true,
-      "status": "completed"
+      "status": "planned"
     },
     {
       "id": "bed",
