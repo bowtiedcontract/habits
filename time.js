@@ -157,3 +157,76 @@ export function formatBerlinNow(date) {
     }).format(date),
   };
 }
+
+const SHORT_MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+function splitISODate(isoDate) {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(isoDate || "");
+  if (!match) return null;
+  return { year: Number(match[1]), month: Number(match[2]), day: Number(match[3]) };
+}
+
+function isoNoon(isoDate) {
+  const parts = splitISODate(isoDate);
+  if (!parts) return null;
+  return new Date(Date.UTC(parts.year, parts.month - 1, parts.day, 12));
+}
+
+export function formatShortDay(isoDate) {
+  const parts = splitISODate(isoDate);
+  if (!parts) return isoDate || "";
+  const weekday = new Intl.DateTimeFormat("en-GB", { timeZone: "UTC", weekday: "short" }).format(
+    new Date(Date.UTC(parts.year, parts.month - 1, parts.day))
+  );
+  return `${weekday} ${parts.day} ${SHORT_MONTHS[parts.month - 1]}`;
+}
+
+export function formatWeekSpan(start, end) {
+  const left = splitISODate(start);
+  const right = splitISODate(end);
+  if (!left || !right) return "";
+  const leftMonth = SHORT_MONTHS[left.month - 1];
+  const rightMonth = SHORT_MONTHS[right.month - 1];
+  if (leftMonth === rightMonth) return `${left.day}–${right.day} ${rightMonth}`;
+  return `${left.day} ${leftMonth} – ${right.day} ${rightMonth}`;
+}
+
+export function weekdayNarrow(isoDate) {
+  const date = isoNoon(isoDate);
+  if (!date) return "";
+  return new Intl.DateTimeFormat("en-GB", { timeZone: "UTC", weekday: "narrow" }).format(date);
+}
+
+export function formatBerlinHM(iso) {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return "";
+  return new Intl.DateTimeFormat("en-GB", {
+    timeZone: TZ,
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).format(date);
+}
+
+export function formatMonthLabel(monthKey) {
+  const match = /^(\d{4})-(\d{2})$/.exec(monthKey || "");
+  if (!match) return "";
+  const date = new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1, 1, 12));
+  return new Intl.DateTimeFormat("en-GB", {
+    timeZone: TZ,
+    month: "long",
+    year: "numeric",
+  }).format(date);
+}
+
+export function formatElapsedCompact(ms) {
+  const elapsed = formatElapsed(ms);
+  if (!Number.isFinite(ms)) return { text: "—", spoken: elapsed.spoken };
+  const { days, hours, minutes, seconds, future, spoken } = elapsed;
+  let text;
+  if (days > 0) text = `${days}d ${hours}h`;
+  else if (hours > 0) text = `${hours}h ${minutes}m`;
+  else text = `${minutes}m ${seconds}s`;
+  if (future) text = `in ${text}`;
+  return { text, spoken };
+}
