@@ -3,51 +3,65 @@ import {
   berlinDateISO,
   berlinLocalToISO,
   berlinParts,
-  formatBerlinNow,
   formatBerlinStamp,
-  formatElapsedCompact,
-  formatMonthLabel,
+  formatQuitClock,
   formatShortDay,
+  formatSpokenDay,
   formatWeekSpan,
   toDatetimeLocalValue,
-  weekdayNarrow,
 } from "./time.js";
 import {
   KIND_LABEL,
-  WEEK_KIND_LABEL,
   addDaysISO,
-  buildMonth,
   buildWeek,
   feedListing,
-  filterRows,
   glanceModel,
   kindFromItem,
-  shiftMonth,
+  summarize,
+  summarizeDayCells,
   syncLine,
   syncMessage,
   todayLists,
-  weekDates,
   weekStatusKind,
 } from "./habits.js";
 
 const OVERRIDE_KEY = "habits.quitTimerOverrides";
-const COLLAPSE_KEY = "habits.quitStripCollapsed";
+const SVG = "http://www.w3.org/2000/svg";
+const TABS = ["today", "week", "quit"];
 
-const HABIT_TONE = {
-  "no-smoking": "tone-amber",
-  "no-vaping": "tone-sky",
-  "no-alcohol": "tone-teal",
-  "no-fap": "tone-rose",
-  caffeine: "tone-coffee",
-  sweets: "tone-plum",
+const QUIT_COLOR = {
+  "no-smoking": "#ff5c7a",
+  "no-vaping": "#3ee0f0",
+  "no-alcohol": "#ff9f43",
+  "no-fap": "#ff4d6a",
+  caffeine: "#f5b942",
+  sweets: "#d7a6ff",
 };
 
-const TONE_FALLBACK = ["tone-amber", "tone-sky", "tone-teal", "tone-rose", "tone-coffee", "tone-plum"];
+const QUIT_FALLBACK = ["#ff5c7a", "#3ee0f0", "#ff9f43", "#ff4d6a", "#f5b942", "#d7a6ff"];
 
-const MARK_PATH = {
-  completed: "M5 12.5l4.2 4.2L19 7",
-  missed: "M7 7l10 10M17 7L7 17",
-  skipped: "M6 12h12",
+const ICON_COLOR = {
+  book: "#7dd3fc",
+  pill: "#fdba74",
+  chart: "#5eead4",
+  bolt: "#fde68a",
+  mountain: "#93c5fd",
+  leaf: "#86efac",
+  dumbbell: "#67e8f9",
+  pulse: "#7dd3fc",
+  spark: "#d8b4fe",
+};
+
+const ICONS = {
+  book: ["M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z", "M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"],
+  pill: ["M10.5 20.5l10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7z", "M8.5 8.5l7 7"],
+  chart: ["M23 6l-9.5 9.5-5-5L1 18", "M17 6h6v6"],
+  bolt: ["M13 2L3 14h9l-1 8 10-12h-9l1-8z"],
+  mountain: ["m8 3 4 8 5-5 5 15H2L8 3z"],
+  leaf: ["M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z", "M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"],
+  dumbbell: ["M6.5 6.5v11", "M17.5 6.5v11", "M3.5 9v6", "M20.5 9v6", "M6.5 12h11"],
+  pulse: ["M22 12h-4l-3 9L9 3l-3 9H2"],
+  spark: ["M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3z"],
 };
 
 const state = {
@@ -60,13 +74,14 @@ const state = {
   weekError: false,
   fitnessError: false,
   quitError: false,
+  quitTzNote: "",
   tab: "today",
-  filter: "all",
   selectedDate: "",
-  viewMonth: "",
-  quitCollapsed: false,
-  sheetId: null,
-  sheetReturn: null,
+  openDay: "",
+  editorId: null,
+  editorReturn: null,
+  aboutReturn: null,
+  userPickedDate: false,
 };
 
 const $ = (selector) => document.querySelector(selector);
@@ -76,6 +91,76 @@ function el(tag, className, text) {
   if (className) node.className = className;
   if (text != null) node.textContent = text;
   return node;
+}
+
+function svgIcon(paths, size) {
+  const svg = document.createElementNS(SVG, "svg");
+  svg.setAttribute("viewBox", "0 0 24 24");
+  svg.setAttribute("width", String(size));
+  svg.setAttribute("height", String(size));
+  svg.setAttribute("aria-hidden", "true");
+  for (const d of paths) {
+    const path = document.createElementNS(SVG, "path");
+    path.setAttribute("d", d);
+    path.setAttribute("fill", "none");
+    path.setAttribute("stroke", "currentColor");
+    path.setAttribute("stroke-width", "2");
+    path.setAttribute("stroke-linecap", "round");
+    path.setAttribute("stroke-linejoin", "round");
+    svg.append(path);
+  }
+  return svg;
+}
+
+function iconKey(id, name) {
+  const hay = `${id || ""} ${name || ""}`.toLowerCase();
+  if (hay.includes("german") || hay.includes("anki") || hay.includes("read")) return "book";
+  if (hay.includes("vitamin") || hay.includes("supplement")) return "pill";
+  if (hay.includes("invest")) return "chart";
+  if (hay.includes("sprint")) return "bolt";
+  if (hay.includes("boulder") || hay.includes("climb")) return "mountain";
+  if (hay.includes("yoga") || hay.includes("meditat")) return "leaf";
+  if (hay.includes("abs") || hay.includes("forearm") || hay.includes("strength")) return "dumbbell";
+  if (hay.includes("couch") || hay.includes("run") || hay.includes("cardio") || hay.includes("5k")) return "pulse";
+  return "spark";
+}
+
+function habitIcon(id, name) {
+  const key = iconKey(id, name);
+  const wrap = el("span", "hab-icon");
+  wrap.style.setProperty("--ico", ICON_COLOR[key] || ICON_COLOR.spark);
+  wrap.append(svgIcon(ICONS[key] || ICONS.spark, 22));
+  return wrap;
+}
+
+function mark(kind) {
+  const span = el("span", `mark mark-${kind}`);
+  span.setAttribute("aria-hidden", "true");
+  if (kind === "completed") span.append(svgIcon(["M20 6L9 17l-5-5"], 20));
+  if (kind === "missed") span.append(svgIcon(["M18 6L6 18", "M6 6l12 12"], 18));
+  return span;
+}
+
+function statusNode(kind) {
+  const visual = kind === "upcoming" ? "open" : kind;
+  const wrap = el("div", "status");
+  if (kind === "skipped" || kind === "missed" || kind === "unplanned") {
+    const word = el("span", kind === "missed" ? "status-word miss" : "status-word", KIND_LABEL[kind] || "Open");
+    wrap.append(word);
+  }
+  if (kind !== "unplanned" && (visual === "completed" || visual === "open" || visual === "skipped" || visual === "missed")) {
+    wrap.append(mark(visual));
+  }
+  if (kind === "completed" || kind === "open" || kind === "upcoming") {
+    wrap.append(el("span", "sr-only", KIND_LABEL[kind] || "Open"));
+  }
+  return wrap;
+}
+
+function chevron() {
+  const svg = svgIcon(["M6 9l6 6 6-6"], 22);
+  svg.setAttribute("class", "chev");
+  return svg;
 }
 
 async function fetchJson(url) {
@@ -121,88 +206,83 @@ function writeOverrides(overrides) {
   }
 }
 
-function initialTab() {
+function readTab() {
+  const hash = location.hash.replace(/^#/, "");
+  if (TABS.includes(hash)) return hash;
   const query = new URLSearchParams(location.search).get("tab");
-  const hash = location.hash.replace("#", "");
-  const value = query || hash;
-  if (value === "week" || value === "month" || value === "today") return value;
+  if (TABS.includes(query)) return query;
   return "today";
 }
 
-function paintClock() {
-  const now = new Date();
-  $("#now-date").textContent = formatShortDay(berlinDateISO(now));
-  $("#now-time").textContent = formatBerlinNow(now).timeLine;
+function writeHash(tab) {
+  const next = `${location.pathname}${location.search}#${tab}`;
+  if (`${location.pathname}${location.search}${location.hash}` !== next) {
+    history.replaceState(null, "", next);
+  }
 }
 
-function miniIcon(d) {
-  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-  svg.setAttribute("viewBox", "0 0 24 24");
-  svg.setAttribute("aria-hidden", "true");
-  const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-  path.setAttribute("d", d);
-  path.setAttribute("fill", "none");
-  path.setAttribute("stroke", "currentColor");
-  path.setAttribute("stroke-width", "2.4");
-  path.setAttribute("stroke-linecap", "round");
-  path.setAttribute("stroke-linejoin", "round");
-  svg.append(path);
-  return svg;
+function applyTab(tab) {
+  state.tab = tab;
+  document.documentElement.dataset.tab = tab;
+  for (const name of TABS) {
+    const on = name === tab;
+    const button = document.getElementById(`tab-${name}`);
+    const panel = document.getElementById(`panel-${name}`);
+    button.setAttribute("aria-selected", on ? "true" : "false");
+    button.tabIndex = on ? 0 : -1;
+    panel.hidden = !on;
+  }
 }
 
-function mark(kind) {
-  const span = el("span", `mark mark-${kind}`);
-  span.setAttribute("aria-hidden", "true");
-  if (MARK_PATH[kind]) span.append(miniIcon(MARK_PATH[kind]));
-  return span;
+function setTab(tab) {
+  if (!TABS.includes(tab) || tab === state.tab) return;
+  writeHash(tab);
+  applyTab(tab);
+  window.scrollTo(0, 0);
 }
 
-function restartIcon() {
-  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-  svg.setAttribute("viewBox", "0 0 24 24");
-  svg.setAttribute("width", "16");
-  svg.setAttribute("height", "16");
-  svg.setAttribute("aria-hidden", "true");
-  const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-  path.setAttribute("fill", "none");
-  path.setAttribute("stroke", "currentColor");
-  path.setAttribute("stroke-width", "2.2");
-  path.setAttribute("stroke-linecap", "round");
-  path.setAttribute("stroke-linejoin", "round");
-  path.setAttribute("d", "M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8M3 3v5h5");
-  svg.append(path);
-  return svg;
+function anchorDate() {
+  if (state.day?.date) return state.day.date;
+  return berlinDateISO(new Date());
 }
 
-function paintElapsed(timer) {
-  const card = document.querySelector(`[data-timer="${timer.id}"]`);
-  if (!card) return;
-  const compact = formatElapsedCompact(Date.now() - Date.parse(timer.start));
-  card.querySelector("[data-primary]").textContent = compact.text;
-  const main = card.querySelector(".qchip-main");
-  const local = timer.override ? ", saved in this browser" : "";
-  main.setAttribute("aria-label", `Edit ${timer.label}, ${compact.spoken}${local}`);
-  if (state.sheetId === timer.id) paintSheet(timer);
+function selectDate(iso) {
+  if (!iso || iso === state.selectedDate) return;
+  state.userPickedDate = true;
+  state.selectedDate = iso;
+  state.openDay = "";
+  renderDays();
+  window.scrollTo(0, 0);
 }
 
-function paintQuitSummary() {
-  const node = $("#quit-summary");
-  node.textContent = state.timers
-    .map((timer) => {
-      const compact = formatElapsedCompact(Date.now() - Date.parse(timer.start));
-      return `${timer.label} ${compact.text}`;
-    })
-    .join(" · ");
+function shiftDay(delta) {
+  selectDate(addDaysISO(state.selectedDate, delta));
+}
+
+function paintQuitClocks() {
+  const now = Date.now();
+  for (const timer of state.timers) {
+    const card = document.querySelector(`[data-timer="${timer.id}"]`);
+    if (!card) continue;
+    const clock = formatQuitClock(now - Date.parse(timer.start));
+    const time = card.querySelector("[data-time]");
+    const since = card.querySelector("[data-since]");
+    if (time) time.textContent = clock.text;
+    if (since) since.textContent = clock.future ? "until start" : "since quitting";
+  }
+  if (state.editorId) {
+    const timer = state.timers.find((item) => item.id === state.editorId);
+    if (timer) paintEditor(timer);
+  }
 }
 
 function tick() {
-  paintClock();
-  for (const timer of state.timers) paintElapsed(timer);
-  if (state.quitCollapsed) paintQuitSummary();
+  paintQuitClocks();
 }
 
 function updateResetAll() {
-  $("#reset-all").hidden = !state.timers.some((timer) => timer.override);
+  const button = $("#reset-all");
+  if (button) button.hidden = !state.timers.some((timer) => timer.override);
 }
 
 function applyTimerStart(id, iso, { override }) {
@@ -212,12 +292,12 @@ function applyTimerStart(id, iso, { override }) {
   timer.override = override;
   const card = document.querySelector(`[data-timer="${id}"]`);
   if (card) card.classList.toggle("is-override", override);
-  paintElapsed(timer);
+  paintQuitClocks();
   updateResetAll();
-  if (state.sheetId === id) {
-    const input = $("#sheet-input");
+  if (state.editorId === id) {
+    const input = $("#editor-input");
     if (input) input.value = toDatetimeLocalValue(iso);
-    paintSheet(timer);
+    paintEditor(timer);
   }
 }
 
@@ -241,25 +321,31 @@ function restartTimer(id) {
       `${parts.year}-${parts.month}-${parts.day}T${parts.hour}:${parts.minute}:${parts.second}`
     );
     saveOverride(id, iso);
-    $("#sheet-error").hidden = true;
+    const error = $("#editor-error");
+    if (error) error.hidden = true;
   } catch (err) {
-    if (state.sheetId === id) {
-      const error = $("#sheet-error");
+    if (state.editorId === id) {
+      const error = $("#editor-error");
       error.hidden = false;
       error.textContent = err.message || "Could not restart.";
     }
   }
 }
 
-function renderQuit(payload) {
-  const grid = $("#quit-grid");
-  grid.replaceChildren();
-  if (state.quitError || !payload) {
-    grid.append(el("p", "error", "Quit timers could not be loaded."));
+function resetAll() {
+  const ok = window.confirm("Clear every quit-timer date saved in this browser?");
+  if (!ok) return;
+  try {
+    localStorage.removeItem(OVERRIDE_KEY);
+  } catch {
     return;
   }
+  for (const timer of state.timers) applyTimerStart(timer.id, timer.defaultStart, { override: false });
+}
+
+function loadTimers(payload) {
   const overrides = readOverrides();
-  const timers = Array.isArray(payload.timers) ? payload.timers : [];
+  const timers = Array.isArray(payload?.timers) ? payload.timers : [];
   state.timers = timers
     .filter((timer) => timer && timer.id && timer.label && timer.start)
     .map((timer, index) => ({
@@ -268,308 +354,316 @@ function renderQuit(payload) {
       defaultStart: String(timer.start),
       start: overrides[timer.id] || String(timer.start),
       override: Boolean(overrides[timer.id]),
-      tone: HABIT_TONE[timer.id] || TONE_FALLBACK[index % TONE_FALLBACK.length],
+      color: QUIT_COLOR[timer.id] || QUIT_FALLBACK[index % QUIT_FALLBACK.length],
     }));
+}
 
-  if (!state.timers.length) {
-    grid.append(el("p", "empty", "No quit timers in data/quit-timers.json."));
+function renderQuit() {
+  const root = $("#panel-quit");
+  root.replaceChildren();
+  if (state.quitError) {
+    root.append(el("p", "plain", "Quit timers could not be loaded."));
     return;
   }
-
-  for (const timer of state.timers) {
-    grid.append(renderQuitChip(timer));
-    paintElapsed(timer);
+  if (!state.timers.length) {
+    root.append(el("p", "plain", "No quit timers in the file."));
+    return;
   }
-  paintQuitSummary();
-  updateResetAll();
+  const list = el("div", "qlist");
+  for (const timer of state.timers) {
+    const card = el("article", "qcard");
+    card.dataset.timer = timer.id;
+    card.style.setProperty("--q", timer.color);
+    card.classList.toggle("is-override", timer.override);
+    const label = el("h2", "qlabel", timer.label);
+    const edit = el("button", "hit qedit");
+    edit.type = "button";
+    edit.dataset.edit = timer.id;
+    edit.setAttribute("aria-label", `Edit ${timer.label}`);
+    edit.append(svgIcon(["M12 20h9", "M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"], 22));
+    const mid = el("div", "qmid");
+    const time = el("p", "qtime", "—");
+    time.dataset.time = "";
+    const since = el("p", "qsince", "since quitting");
+    since.dataset.since = "";
+    mid.append(time, since);
+    card.append(label, edit, mid);
+    list.append(card);
+  }
+  root.append(list);
+  paintQuitClocks();
 }
 
-function renderQuitChip(timer) {
-  const chip = el("div", `qchip ${timer.tone}`);
-  chip.dataset.timer = timer.id;
-  chip.classList.toggle("is-override", timer.override);
-
-  const main = el("button", "qchip-main");
-  main.type = "button";
-  const name = el("span", "qchip-name", timer.label);
-  const time = el("span", "qchip-time", "—");
-  time.dataset.primary = "";
-  main.append(name, time);
-  main.addEventListener("click", () => openSheet(timer.id));
-
-  const restart = el("button", "qchip-restart");
-  restart.type = "button";
-  restart.setAttribute("aria-label", `Restart ${timer.label} from now`);
-  restart.append(restartIcon());
-  restart.addEventListener("click", () => restartTimer(timer.id));
-
-  chip.append(main, restart);
-  return chip;
+function paintEditor(timer) {
+  const clock = formatQuitClock(Date.now() - Date.parse(timer.start));
+  $("#editor-elapsed").textContent = clock.text;
+  $("#editor-elapsed").style.color = timer.color;
+  $("#editor-since").textContent = clock.future
+    ? `Until ${formatBerlinStamp(timer.start)}`
+    : `Since ${formatBerlinStamp(timer.start)}`;
+  $("#editor-source").hidden = !timer.override;
+  $("#editor-reset").hidden = !timer.override;
 }
 
-function paintSheet(timer) {
-  const compact = formatElapsedCompact(Date.now() - Date.parse(timer.start));
-  $("#sheet-elapsed").textContent = compact.text;
-  $("#sheet-since").textContent = `Since ${formatBerlinStamp(timer.start)}`;
-  $("#sheet-source").hidden = !timer.override;
-  $("#sheet-reset").hidden = !timer.override;
-}
-
-function sheetFocusable() {
-  return [...$("#sheet-panel").querySelectorAll("button, input")].filter((node) => !node.hidden);
-}
-
-function openSheet(id) {
+function openEditor(id) {
   const timer = state.timers.find((item) => item.id === id);
   if (!timer) return;
-  state.sheetId = id;
-  state.sheetReturn = document.activeElement;
-  $("#sheet-title").textContent = timer.label;
-  $("#sheet-input").value = toDatetimeLocalValue(timer.start);
-  $("#sheet-error").hidden = true;
-  paintSheet(timer);
-  $("#sheet").hidden = false;
+  state.editorId = id;
+  state.editorReturn = document.activeElement;
+  $("#editor-title").textContent = timer.label;
+  $("#editor-input").value = toDatetimeLocalValue(timer.start);
+  $("#editor-error").hidden = true;
+  paintEditor(timer);
+  $("#editor").hidden = false;
   document.body.classList.add("sheet-open");
-  $("#sheet-restart").focus();
+  $("#editor-restart").focus();
 }
 
-function closeSheet() {
-  $("#sheet").hidden = true;
-  document.body.classList.remove("sheet-open");
-  const back = state.sheetReturn;
-  state.sheetId = null;
-  state.sheetReturn = null;
+function closeEditor() {
+  $("#editor").hidden = true;
+  if ($("#about").hidden) document.body.classList.remove("sheet-open");
+  const back = state.editorReturn;
+  state.editorId = null;
+  state.editorReturn = null;
   if (back && typeof back.focus === "function") back.focus();
 }
 
-function setQuitCollapsed(collapsed) {
-  state.quitCollapsed = collapsed;
-  $("#quit-panel").hidden = collapsed;
-  $("#quit-summary").hidden = !collapsed;
-  const toggle = $("#quit-toggle");
-  toggle.setAttribute("aria-expanded", collapsed ? "false" : "true");
-  toggle.textContent = collapsed ? "Show" : "Hide";
-  if (collapsed) paintQuitSummary();
-  try {
-    localStorage.setItem(COLLAPSE_KEY, collapsed ? "1" : "0");
-  } catch {
-    /* the strip still toggles for this visit */
-  }
-}
-
-function fillGlance(node, { kicker, summary, noun }) {
-  node.replaceChildren();
-  node.append(el("p", "glance-kicker", kicker));
-  if (!summary.total) {
-    node.append(el("p", "glance-count empty", "No tasks"));
-    return;
-  }
-  const line = el("p", "glance-count");
-  line.append(el("span", "glance-frac", `${summary.done}/${summary.total}`));
-  line.append(document.createTextNode(" "));
-  line.append(el("span", "glance-noun", noun));
-  if (summary.skipped) {
-    line.append(el("span", "glance-skip", `· ${summary.skipped} skipped`));
-  }
-  node.append(line);
-  const bar = el("div", "bar");
-  bar.setAttribute("role", "progressbar");
-  bar.setAttribute("aria-valuemin", "0");
-  bar.setAttribute("aria-valuemax", String(summary.total));
-  bar.setAttribute("aria-valuenow", String(summary.done));
-  bar.setAttribute("aria-label", `${kicker} ${summary.done} of ${summary.total} ${noun}`);
-  const fill = el("span");
-  fill.style.width = `${Math.round((100 * summary.done) / summary.total)}%`;
-  bar.append(fill);
-  node.append(bar);
-}
-
-function renderGlance() {
-  const todayISO = berlinDateISO(new Date());
-  const todayCard = $("#glance-today");
-  const weekCard = $("#glance-week");
-  if (state.dayError) {
-    todayCard.replaceChildren(el("p", "error", "Today could not be loaded."));
-  }
-  if (state.weekError) {
-    weekCard.replaceChildren(el("p", "error", "This week could not be loaded."));
-  }
-  const glance = glanceModel({
-    day: state.dayError ? null : state.day,
-    week: state.weekError ? null : state.week,
-    todayISO,
-  });
-  if (!state.dayError) {
-    const kicker = glance.fileIsToday || state.selectedDate === state.day?.date ? glance.dailyLabel : `Latest · ${glance.dailyLabel}`;
-    fillGlance(todayCard, { kicker, summary: glance.daily, noun: "done" });
-  }
-  if (!state.weekError) {
-    fillGlance(weekCard, { kicker: glance.weekLabel, summary: glance.workouts, noun: "workouts" });
-  }
-}
-
-function renderSyncNote() {
-  const note = $("#sync-note");
-  const todayISO = berlinDateISO(new Date());
-  const daily = state.dayError
-    ? []
-    : todayLists({
-        day: state.day,
-        week: state.weekError ? null : state.week,
-        history: state.history,
-        selectedDate: state.selectedDate,
-        filter: "daily",
-      }).daily;
-  const message = syncMessage({
-    dayDate: state.dayError ? "" : state.day?.date || "",
-    todayISO,
-    selectedDate: state.selectedDate,
-    hasDailyItems: daily.length > 0,
-  });
-  note.hidden = !message;
-  note.textContent = message;
-}
-
-function renderChrome() {
-  const todayISO = berlinDateISO(new Date());
-  $("#view-date").textContent = formatShortDay(state.selectedDate) || "—";
-  const todayBtn = $("#jump-today");
-  const onToday = state.selectedDate === todayISO;
-  todayBtn.classList.toggle("is-current", onToday);
-  if (onToday) todayBtn.setAttribute("aria-current", "date");
-  else todayBtn.removeAttribute("aria-current");
-
-  for (const name of ["today", "week", "month"]) {
-    const tab = document.querySelector(`[data-tab="${name}"]`);
-    const panel = document.querySelector(`#panel-${name}`);
-    const on = state.tab === name;
-    tab.setAttribute("aria-selected", on ? "true" : "false");
-    tab.tabIndex = on ? 0 : -1;
-    panel.hidden = !on;
-  }
-  for (const name of ["all", "daily", "workout"]) {
-    const button = document.querySelector(`[data-filter="${name}"]`);
-    const on = state.filter === name;
-    button.setAttribute("aria-checked", on ? "true" : "false");
-    button.classList.toggle("is-on", on);
-  }
-}
-
-function habitRow(item, date, todayISO) {
-  const kind = kindFromItem(item, date, todayISO);
-  const row = el("article", `hrow kind-${kind}`);
-  row.dataset.kind = kind;
-  row.append(mark(kind));
-  const copy = el("div", "hcopy");
+function habitCard(item, kind, subtitle) {
+  const card = el("article", "hcard");
+  card.dataset.kind = kind;
+  card.append(habitIcon(item.id, item.name));
+  const copy = el("div");
   copy.append(el("h3", "hname", item.name || item.id || "Habit"));
-  if (item.note) copy.append(el("p", "hnote", String(item.note)));
-  if (item.when) copy.append(el("p", "hwhen", String(item.when)));
-  if (item.planned === false) copy.append(el("p", "hwhen", "Not on the plan"));
-  row.append(copy);
-  row.append(el("span", `hchip kind-${kind}`, KIND_LABEL[kind] || "Open"));
-  return row;
+  copy.append(el("p", "hsub", subtitle));
+  card.append(copy);
+  card.append(statusNode(kind));
+  return card;
 }
 
-function weekWorkoutRow(item) {
-  const kind = weekStatusKind(item.status);
-  const row = el("article", `hrow kind-${kind}`);
-  row.dataset.kind = kind;
-  row.append(mark(kind));
-  const copy = el("div", "hcopy");
-  copy.append(el("h3", "hname", item.name || item.id || "Workout"));
-  copy.append(el("p", "hwhen", "Weekly target"));
-  row.append(copy);
-  row.append(el("span", `hchip kind-${kind}`, KIND_LABEL[kind]));
-  return row;
+function sessionCard(workout) {
+  const card = el("article", "hcard session");
+  card.append(habitIcon(workout.name, workout.name));
+  const copy = el("div");
+  copy.append(el("h3", "hname", workout.name || "Session"));
+  if (workout.date) copy.append(el("p", "hsub", formatShortDay(workout.date)));
+  if (workout.detail) copy.append(el("p", "hdetail", String(workout.detail)));
+  card.append(copy);
+  return card;
+}
+
+function ringBlock(summary) {
+  const hero = el("div", "hero");
+  const ring = el("div", "ring");
+  const ratio = summary.total ? summary.done / summary.total : 0;
+  const radius = 46;
+  const circ = 2 * Math.PI * radius;
+  const svg = document.createElementNS(SVG, "svg");
+  svg.setAttribute("viewBox", "0 0 120 120");
+  svg.setAttribute("aria-hidden", "true");
+  const track = document.createElementNS(SVG, "circle");
+  track.setAttribute("cx", "60");
+  track.setAttribute("cy", "60");
+  track.setAttribute("r", String(radius));
+  track.setAttribute("fill", "none");
+  track.setAttribute("stroke", "rgba(255,255,255,0.14)");
+  track.setAttribute("stroke-width", "10");
+  svg.append(track);
+  if (ratio > 0) {
+    const value = document.createElementNS(SVG, "circle");
+    value.setAttribute("cx", "60");
+    value.setAttribute("cy", "60");
+    value.setAttribute("r", String(radius));
+    value.setAttribute("fill", "none");
+    value.setAttribute("stroke", ratio >= 1 ? "#3ddc84" : "#f6f3ff");
+    value.setAttribute("stroke-width", "10");
+    value.setAttribute("stroke-linecap", "round");
+    value.setAttribute("stroke-dasharray", circ.toFixed(3));
+    value.setAttribute("stroke-dashoffset", (circ * (1 - ratio)).toFixed(3));
+    value.setAttribute("transform", "rotate(-90 60 60)");
+    svg.append(value);
+  }
+  const copy = el("div", "ring-copy");
+  const pct = summary.total ? Math.round((100 * summary.done) / summary.total) : 0;
+  copy.append(el("p", "ring-pct", `${pct}%`));
+  ring.append(svg, copy);
+  ring.setAttribute("aria-hidden", "true");
+  const of = el("p", "ring-of", `${summary.done} of ${summary.total} done`);
+  hero.append(ring, of);
+  hero.setAttribute("role", "img");
+  hero.setAttribute("aria-label", `${summary.done} of ${summary.total} done, ${pct} percent`);
+  return hero;
 }
 
 function renderToday() {
   const root = $("#panel-today");
   root.replaceChildren();
+  const todayISO = berlinDateISO(new Date());
+  const day = state.dayError ? null : state.day;
+  const week = state.weekError ? null : state.week;
+
   if (state.dayError && state.weekError) {
-    root.append(el("p", "error", "Today could not be loaded."));
+    root.append(el("p", "plain", "Today could not be loaded."));
     return;
   }
-  const todayISO = berlinDateISO(new Date());
+
   const lists = todayLists({
-    day: state.dayError ? null : state.day,
-    week: state.weekError ? null : state.week,
+    day,
+    week,
     history: state.history,
     selectedDate: state.selectedDate,
-    filter: state.filter,
+    filter: "all",
   });
-  if (!lists.daily.length && !lists.workouts.length) {
-    root.append(el("p", "empty", "No tasks in the feed for this date."));
+  const waiting = syncMessage({
+    dayDate: day?.date || "",
+    todayISO,
+    selectedDate: state.selectedDate,
+    hasDailyItems: lists.daily.length > 0,
+  });
+  if (waiting && waiting.startsWith("Waiting")) root.append(el("p", "plain", waiting));
+
+  const nav = el("div", "date-nav");
+  const prev = el("button", "hit");
+  prev.id = "prev-day";
+  prev.type = "button";
+  prev.setAttribute("aria-label", "Previous day");
+  prev.append(svgIcon(["M15 18l-6-6 6-6"], 26));
+  const mid = el("div", "date-mid");
+  const label = el("p", "date-label", formatSpokenDay(state.selectedDate) || "—");
+  label.id = "view-date";
+  label.setAttribute("aria-live", "polite");
+  mid.append(label);
+  const anchor = anchorDate();
+  if (state.selectedDate && state.selectedDate !== anchor) {
+    const back = el("button", "jump-back", `Back to ${formatShortDay(anchor)}`);
+    back.id = "jump-back";
+    back.type = "button";
+    mid.append(back);
+  }
+  const next = el("button", "hit");
+  next.id = "next-day";
+  next.type = "button";
+  next.setAttribute("aria-label", "Next day");
+  next.append(svgIcon(["M9 18l6-6-6-6"], 26));
+  nav.append(prev, mid, next);
+  root.append(nav);
+
+  if (lists.daily.length) {
+    root.append(ringBlock(summarize(lists.daily)));
+    const stack = el("div", "stack");
+    for (const item of lists.daily) {
+      const kind = kindFromItem(item, state.selectedDate, todayISO);
+      const subtitle = item.planned === false ? "Not planned" : item.note ? String(item.note) : "Daily";
+      stack.append(habitCard(item, kind, subtitle));
+    }
+    root.append(stack);
+  } else if (waiting && !waiting.startsWith("Waiting")) {
+    root.append(el("p", "plain", waiting));
+  } else if (!state.dayError) {
+    root.append(el("p", "plain", "No habits for this day."));
+  } else {
+    root.append(el("p", "plain", "Today's habits could not be loaded."));
+  }
+
+  if (state.weekError) {
+    root.append(el("h2", "section-title", "This week's workouts"));
+    root.append(el("p", "plain", "This week could not be loaded."));
     return;
   }
-  if (lists.daily.length) {
-    root.append(el("h3", "block-label", "Daily"));
-    const list = el("div", "hlist");
-    for (const item of lists.daily) list.append(habitRow(item, state.selectedDate, todayISO));
-    root.append(list);
+
+  const workouts = (Array.isArray(week?.workouts) ? week.workouts : []).filter((item) => item && (item.id || item.name));
+  if (!workouts.length) return;
+  const glance = glanceModel({ day, week, todayISO });
+  const summary = summarize(workouts);
+  root.append(el("h2", "section-title", glance.weekIsCurrent ? "This week's workouts" : "Workouts"));
+  root.append(
+    el(
+      "p",
+      "count-line",
+      glance.weekIsCurrent ? `${summary.done} of ${summary.total} this week` : `${summary.done} of ${summary.total}`
+    )
+  );
+  const stack = el("div", "stack");
+  for (const item of workouts) {
+    stack.append(habitCard(item, weekStatusKind(item.status), "This week"));
   }
-  if (lists.workouts.length) {
-    root.append(el("h3", "block-label", lists.scope === "week" ? "Workouts this week" : "Workouts"));
-    if (lists.scope === "week") {
-      root.append(el("p", "hint", "One status for the whole week, not a bar for each day."));
+  root.append(stack);
+}
+
+function dayCard(model, todayISO) {
+  const article = el("article", "daycard");
+  if (model.date === todayISO) article.classList.add("is-today");
+  const open = state.openDay === model.date;
+  if (open) article.classList.add("is-open");
+  const button = el("button", "daycard-toggle");
+  button.type = "button";
+  button.dataset.day = model.date;
+  button.setAttribute("aria-expanded", open ? "true" : "false");
+  const row = el("span", "daycard-row");
+  row.append(el("span", "daycard-name", formatShortDay(model.date)));
+  const end = el("span", "daycard-end");
+  if (model.tone === "scored") {
+    end.append(el("span", "daycard-score", `${model.done}/${model.total}`));
+    end.append(el("span", "sr-only", " done"));
+  } else {
+    end.append(el("span", "daycard-note", model.tone === "upcoming" ? "Upcoming" : "No record"));
+  }
+  end.append(chevron());
+  row.append(end);
+  button.append(row);
+  if (model.tone === "scored" && model.total) {
+    const bar = el("span", model.done === model.total ? "mini-bar is-full" : "mini-bar");
+    bar.setAttribute("aria-hidden", "true");
+    const fill = el("span");
+    fill.style.width = `${Math.round((100 * model.done) / model.total)}%`;
+    bar.append(fill);
+    button.append(bar);
+  }
+  article.append(button);
+  if (open) {
+    const body = el("div", "daycard-body");
+    if (!model.details.length) {
+      body.append(el("p", "plain", "No record for this day."));
     }
-    const list = el("div", "hlist");
-    for (const item of lists.workouts) {
-      list.append(lists.scope === "week" ? weekWorkoutRow(item) : habitRow(item, state.selectedDate, todayISO));
+    for (const detail of model.details) {
+      const line = el("div", "dayline");
+      line.append(el("p", "dayline-name", detail.name));
+      line.append(statusNode(detail.kind));
+      body.append(line);
     }
-    root.append(list);
+    article.append(body);
   }
+  return article;
 }
 
-function groupRow(label) {
-  const tr = el("tr", "group-row");
-  const th = el("th", null, label);
-  th.colSpan = 8;
-  th.scope = "colgroup";
-  tr.append(th);
-  return tr;
+function fitnessHasContent(fitness) {
+  if (!fitness || typeof fitness !== "object") return false;
+  const recap = typeof fitness.sundayRecap === "string" && fitness.sundayRecap.trim();
+  const stats = Array.isArray(fitness.stats) && fitness.stats.length;
+  const workouts = Array.isArray(fitness.workouts) && fitness.workouts.length;
+  return Boolean(recap || stats || workouts);
 }
 
-function dayCellsRow(row, todayISO) {
-  const tr = el("tr");
-  const name = el("th", "habit-name-cell", row.name);
-  name.scope = "row";
-  name.title = row.name;
-  tr.append(name);
-  for (const cell of row.cells) {
-    const td = el("td", `cell kind-${cell.kind}`);
-    if (cell.date === state.selectedDate) td.classList.add("is-selected");
-    if (cell.date === todayISO) td.classList.add("is-today");
-    if (cell.kind !== "norecord") td.append(mark(cell.kind));
-    td.append(el("span", "sr-only", `${row.name}, ${formatShortDay(cell.date)}, ${KIND_LABEL[cell.kind]}`));
-    tr.append(td);
+function renderFitness(root) {
+  if (state.fitnessError) {
+    root.append(el("h2", "section-title", "Logged sessions"));
+    root.append(el("p", "plain", "Fitness could not be loaded."));
+    return;
   }
-  return tr;
-}
-
-function weekSpanRow(row, dates, todayISO) {
-  const kind = weekStatusKind(row.weekStatus);
-  const tr = el("tr", "week-status-row");
-  const name = el("th", "habit-name-cell has-chip");
-  name.scope = "row";
-  name.title = `${row.name}: ${WEEK_KIND_LABEL[kind]}`;
-  name.setAttribute("aria-label", `${row.name}, ${WEEK_KIND_LABEL[kind]}`);
-  const line = el("span", "name-line");
-  line.append(el("span", "name-text", row.name));
-  const status = el("span", "status-bit");
-  status.append(mark(kind));
-  status.append(el("span", `hchip kind-${kind}`, KIND_LABEL[kind]));
-  line.append(status);
-  name.append(line);
-  tr.append(name);
-  for (const date of dates) {
-    const td = el("td", "cell kind-week");
-    td.setAttribute("aria-hidden", "true");
-    if (date === state.selectedDate) td.classList.add("is-selected");
-    if (date === todayISO) td.classList.add("is-today");
-    tr.append(td);
+  if (!fitnessHasContent(state.fitness)) return;
+  const fitness = state.fitness;
+  root.append(el("h2", "section-title", "Logged sessions"));
+  if (typeof fitness.sundayRecap === "string" && fitness.sundayRecap.trim()) {
+    root.append(el("p", "plain", fitness.sundayRecap.trim()));
   }
-  return tr;
+  if (Array.isArray(fitness.stats) && fitness.stats.length) {
+    const text = fitness.stats.map((stat) => `${stat.label || "Stat"} ${stat.value ?? "—"}`).join(" · ");
+    root.append(el("p", "plain", text));
+  }
+  if (Array.isArray(fitness.workouts) && fitness.workouts.length) {
+    const stack = el("div", "stack");
+    for (const workout of fitness.workouts) stack.append(sessionCard(workout));
+    root.append(stack);
+  }
 }
 
 function renderWeek() {
@@ -583,385 +677,209 @@ function renderWeek() {
     todayISO,
     focusDate: state.selectedDate || todayISO,
   });
-  const rows = filterRows(model.rows, state.filter);
-  const daily = rows.filter((row) => row.category !== "workout");
-  const workouts = rows.filter((row) => row.category === "workout");
-  if (!model.dates.length || (!daily.length && !workouts.length)) {
-    root.append(el("p", "empty", "No habit records for this week yet."));
+  if (!model.dates.length) {
+    root.append(el("p", "plain", "No week to show."));
     return;
   }
-  const span = formatWeekSpan(model.dates[0], model.dates[6]);
-  root.append(el("p", "week-caption", `Week of ${span}`));
-  const scroll = el("div", "week-scroll");
-  const table = el("table", "week-table");
-  const caption = el("caption", "sr-only", `Habits for the week of ${span}`);
-  table.append(caption);
-  const head = el("thead");
-  const headRow = el("tr");
-  const corner = el("th", "habit-name-cell", "Habit");
-  corner.scope = "col";
-  headRow.append(corner);
-  for (const date of model.dates) {
-    const th = el("th");
-    th.scope = "col";
-    if (date === state.selectedDate) th.classList.add("is-selected");
-    if (date === todayISO) th.classList.add("is-today");
-    const button = el("button", "day-btn");
-    button.type = "button";
-    button.append(el("span", "day-letter", weekdayNarrow(date)));
-    button.append(el("span", "day-num", String(Number(date.slice(-2)))));
-    const label = formatShortDay(date);
-    button.setAttribute("aria-label", date === todayISO ? `${label}, today` : label);
-    if (date === todayISO) button.setAttribute("aria-current", "date");
-    button.addEventListener("click", () => selectDate(date));
-    th.append(button);
-    headRow.append(th);
-  }
-  head.append(headRow);
-  table.append(head);
-  const body = el("tbody");
-  if (daily.length) {
-    body.append(groupRow("Daily"));
-    for (const row of daily) body.append(row.mode === "week" ? weekSpanRow(row, model.dates, todayISO) : dayCellsRow(row, todayISO));
-  }
-  if (workouts.length) {
-    body.append(groupRow("Workouts"));
-    for (const row of workouts) body.append(row.mode === "week" ? weekSpanRow(row, model.dates, todayISO) : dayCellsRow(row, todayISO));
-  }
-  table.append(body);
-  scroll.append(table);
-  root.append(scroll);
-  root.append(
-    el(
-      "p",
-      "hint",
-      "A chip on the name is that workout’s status for the whole week. Blank days are not misses. An outline is upcoming."
-    )
-  );
+  root.append(el("h2", "panel-title", "This week"));
+  root.append(el("p", "week-range", formatWeekSpan(model.dates[0], model.dates[6])));
+  const stack = el("div", "stack");
+  for (const date of model.dates) stack.append(dayCard(summarizeDayCells(model.rows, date), todayISO));
+  root.append(stack);
+  renderFitness(root);
 }
 
-function renderMonth() {
-  const root = $("#panel-month");
-  root.replaceChildren();
-  const todayISO = berlinDateISO(new Date());
-  const nav = el("div", "month-nav");
-  const prev = el("button", "icon-btn", "‹");
-  prev.type = "button";
-  prev.setAttribute("aria-label", "Previous month");
-  prev.addEventListener("click", () => {
-    state.viewMonth = shiftMonth(state.viewMonth, -1);
-    render();
-  });
-  const next = el("button", "icon-btn", "›");
-  next.type = "button";
-  next.setAttribute("aria-label", "Next month");
-  next.addEventListener("click", () => {
-    state.viewMonth = shiftMonth(state.viewMonth, 1);
-    render();
-  });
-  nav.append(prev, el("p", "month-label", formatMonthLabel(state.viewMonth)), next);
-  root.append(nav);
-
-  const month = buildMonth({
-    monthKey: state.viewMonth,
-    day: state.dayError ? null : state.day,
-    history: state.history,
-    todayISO,
-    filter: state.filter,
-  });
-  if (!month.any) {
-    const empty = el("div", "empty-card");
-    empty.append(el("p", "empty-title", "History builds up over time."));
-    empty.append(
-      el(
-        "p",
-        "hint",
-        "When Todo BOT writes data/history.json, each day shows a completion percent here."
-      )
-    );
-    root.append(empty);
-    return;
-  }
-
-  const grid = el("div", "month-grid");
-  const anchor = weekDates(`${state.viewMonth}-01`);
-  for (const date of anchor) grid.append(el("div", "month-dow", weekdayNarrow(date)));
-  for (const cell of month.cells) {
-    if (!cell) {
-      grid.append(el("div", "mcell mcell-pad"));
-      continue;
-    }
-    const button = el("button", "mcell");
-    button.type = "button";
-    if (cell.percent != null) {
-      button.classList.add("has-data");
-      if (cell.percent >= 100) button.dataset.band = "3";
-      else if (cell.percent >= 50) button.dataset.band = "2";
-      else if (cell.percent > 0) button.dataset.band = "1";
-      else button.dataset.band = "0";
-    }
-    if (cell.date === state.selectedDate) button.classList.add("is-selected");
-    if (cell.isToday) button.classList.add("is-today");
-    button.append(el("span", "mday", String(cell.day)));
-    if (cell.percent != null) button.append(el("span", "mpct", `${cell.percent}%`));
-    const detail = cell.percent == null ? "no record" : `${cell.summary.done} of ${cell.summary.total} done`;
-    button.setAttribute("aria-label", `${formatShortDay(cell.date)}, ${detail}`);
-    button.addEventListener("click", () => openDay(cell.date));
-    grid.append(button);
-  }
-  root.append(grid);
-  if (!state.history) {
-    root.append(
-      el(
-        "p",
-        "hint",
-        "Only days already in the feed are filled in. Earlier days appear when data/history.json is added."
-      )
-    );
-  }
-}
-
-function nameBlock(title, items) {
+function nameGroup(title, items) {
   const block = el("div");
-  block.append(el("h3", "subhead", title));
-  const list = el("ul", "tracked-list");
-  if (!items.length) list.append(el("li", "empty", "None"));
-  for (const item of items) {
-    const li = el("li", null, item.name);
-    li.title = item.id;
-    list.append(li);
-  }
+  block.append(el("h3", null, title));
+  const list = el("ul", "about-list");
+  if (!items.length) list.append(el("li", null, "None"));
+  for (const item of items) list.append(el("li", null, item.name));
   block.append(list);
   return block;
 }
 
-function renderTracked() {
-  const root = $("#tracked");
-  root.replaceChildren();
-  if (state.dayError && state.weekError) return;
-  const feed = feedListing({
-    day: state.dayError ? null : state.day,
-    week: state.weekError ? null : state.week,
-    history: state.history,
-  });
-  const head = el("div", "tracked-head");
-  head.append(el("h2", null, "Tracked from Todoist"));
-  const line = syncLine(feed.dayUpdated, feed.weekUpdated);
-  if (line) head.append(el("p", "sync-line", line));
-  root.append(head);
-  const cols = el("div", "tracked-cols");
-  cols.append(nameBlock("Daily", feed.daily));
-  cols.append(nameBlock("Workouts", feed.workouts));
-  root.append(cols);
-  if (feed.also.length) {
-    root.append(el("h3", "subhead", "Also in the week file"));
-    const list = el("ul", "tracked-list");
-    for (const item of feed.also) {
-      const li = el("li");
-      li.append(document.createTextNode(item.name));
-      if (item.when) li.append(el("span", "hwhen", ` · ${item.when}`));
-      list.append(li);
+function renderAbout() {
+  const body = $("#about-body");
+  if (!body) return;
+  body.replaceChildren();
+  const day = state.dayError ? null : state.day;
+  const week = state.weekError ? null : state.week;
+  if ((day && day.sample) || (week && week.sample)) {
+    body.append(el("p", "plain", "Sample habit data. Todo BOT will replace the day and week files."));
+  }
+  body.append(el("h3", null, "Tracked from Todoist"));
+  if (state.dayError && state.weekError) {
+    body.append(el("p", "plain", "The habit files could not be loaded."));
+  } else {
+    const feed = feedListing({ day, week, history: state.history });
+    const line = syncLine(feed.dayUpdated, feed.weekUpdated);
+    if (line) body.append(el("p", "plain", line));
+    body.append(nameGroup("Daily", feed.daily));
+    body.append(nameGroup("Workouts", feed.workouts));
+    if (feed.also.length) {
+      const list = el("ul", "about-list");
+      for (const item of feed.also) {
+        const text = item.when ? `${item.name} · ${item.when}` : item.name;
+        list.append(el("li", null, text));
+      }
+      const block = el("div");
+      block.append(el("h3", null, "Also in the week file"));
+      block.append(list);
+      body.append(block);
     }
-    root.append(list);
   }
+  body.append(el("p", "plain", "Read-only. Tick habits in Todoist."));
+  body.append(el("p", "plain", "Quit labels on this page are visible to anyone with the link."));
+  body.append(el("p", "plain", "Resets save in this browser only. Phone and laptop do not share these dates."));
+  body.append(el("p", "plain", "Earlier days stay blank until a history file is synced."));
+  if (state.quitTzNote) body.append(el("p", "plain", state.quitTzNote));
+  const reset = el("button", "btn btn-secondary", "Reset all dates to the file");
+  reset.type = "button";
+  reset.id = "reset-all";
+  reset.hidden = !state.timers.some((timer) => timer.override);
+  reset.addEventListener("click", resetAll);
+  body.append(reset);
 }
 
-function fitnessHasContent(fitness) {
-  if (!fitness || typeof fitness !== "object") return false;
-  const recap = typeof fitness.sundayRecap === "string" && fitness.sundayRecap.trim();
-  const stats = Array.isArray(fitness.stats) && fitness.stats.length;
-  const workouts = Array.isArray(fitness.workouts) && fitness.workouts.length;
-  return Boolean(recap || stats || workouts);
-}
-
-function renderFitness() {
-  const root = $("#fitness");
-  root.replaceChildren();
-  const heading = el("h2", null, "Logged sessions");
-  heading.id = "fitness-heading";
-  if (state.fitnessError) {
-    root.append(heading);
-    root.append(el("p", "error", "Fitness could not be loaded."));
-    return;
-  }
-  if (!fitnessHasContent(state.fitness)) {
-    root.append(heading);
-    root.append(el("p", "hint", "Appears here when Fitness Bot writes data/fitness.json."));
-    return;
-  }
-  const fitness = state.fitness;
-  root.append(heading);
-  root.append(el("p", "hint", "From Fitness Bot. Separate from the Todoist workout list."));
-  if (typeof fitness.sundayRecap === "string" && fitness.sundayRecap.trim()) {
-    root.append(el("p", "recap", fitness.sundayRecap.trim()));
-  }
-  if (Array.isArray(fitness.stats) && fitness.stats.length) {
-    const bits = fitness.stats.map((stat) => `${stat.label || "Stat"} ${stat.value ?? "—"}`);
-    root.append(el("p", "stat-line", `Fitness Bot · ${bits.join(" · ")}`));
-  }
-  if (Array.isArray(fitness.workouts) && fitness.workouts.length) {
-    const list = el("div", "hlist");
-    for (const workout of fitness.workouts) {
-      const card = el("article", "hrow session");
-      const copy = el("div", "hcopy");
-      copy.append(el("h3", "hname", workout.name || "Session"));
-      if (workout.date) copy.append(el("p", "hwhen", formatShortDay(workout.date)));
-      if (workout.detail) copy.append(el("p", "hnote", String(workout.detail)));
-      card.append(copy);
-      list.append(card);
-    }
-    root.append(list);
-  }
-}
-
-function renderLegend() {
-  const row = $("#legend");
-  if (row.childElementCount) return;
-  for (const kind of ["completed", "skipped", "missed", "open", "upcoming"]) {
-    const item = el("span", "legend-item");
-    item.setAttribute("role", "listitem");
-    item.append(mark(kind));
-    item.append(el("span", null, KIND_LABEL[kind]));
-    row.append(item);
-  }
-}
-
-function render() {
-  renderChrome();
-  renderGlance();
-  renderSyncNote();
+function renderDays() {
   renderToday();
   renderWeek();
-  renderMonth();
-  renderTracked();
-  renderFitness();
 }
 
-function selectDate(iso) {
-  if (!iso) return;
-  state.selectedDate = iso;
-  state.viewMonth = iso.slice(0, 7);
-  render();
+function openAbout() {
+  state.aboutReturn = document.activeElement;
+  $("#about").hidden = false;
+  document.body.classList.add("sheet-open");
+  $("#about-close").focus();
 }
 
-function openDay(iso) {
-  state.selectedDate = iso;
-  state.viewMonth = iso.slice(0, 7);
-  setTab("today");
+function closeAbout() {
+  $("#about").hidden = true;
+  if ($("#editor").hidden) document.body.classList.remove("sheet-open");
+  const back = state.aboutReturn;
+  state.aboutReturn = null;
+  if (back && typeof back.focus === "function") back.focus();
 }
 
-function setTab(tab) {
-  state.tab = tab;
-  const next = `${location.pathname}${location.search}#${tab}`;
-  history.replaceState(null, "", next);
-  render();
+function trapSheet(panel, event) {
+  if (event.key !== "Tab") return;
+  const focusable = [...panel.querySelectorAll("button, input")].filter((node) => !node.hidden && !node.closest("[hidden]"));
+  if (!focusable.length) return;
+  const first = focusable[0];
+  const last = focusable[focusable.length - 1];
+  if (event.shiftKey && document.activeElement === first) {
+    event.preventDefault();
+    last.focus();
+  } else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault();
+    first.focus();
+  }
 }
 
-function bindControls() {
-  $("#range-tabs").addEventListener("click", (event) => {
+function bind() {
+  $("#info-open").addEventListener("click", openAbout);
+  $("#about-backdrop").addEventListener("click", closeAbout);
+  $("#about-close").addEventListener("click", closeAbout);
+
+  document.querySelector(".tabbar").addEventListener("click", (event) => {
     const tab = event.target.closest("[data-tab]");
     if (!tab) return;
     setTab(tab.dataset.tab);
   });
-  $("#range-tabs").addEventListener("keydown", (event) => {
+  document.querySelector(".tabbar").addEventListener("keydown", (event) => {
     if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
-    const order = ["today", "week", "month"];
-    const index = order.indexOf(state.tab);
-    const next = event.key === "ArrowRight" ? (index + 1) % order.length : (index + order.length - 1) % order.length;
+    const index = TABS.indexOf(state.tab);
+    const next = event.key === "ArrowRight" ? (index + 1) % TABS.length : (index + TABS.length - 1) % TABS.length;
     event.preventDefault();
-    setTab(order[next]);
-    document.querySelector(`[data-tab="${order[next]}"]`).focus();
+    setTab(TABS[next]);
+    document.getElementById(`tab-${TABS[next]}`).focus();
   });
-  document.querySelector(".filters").addEventListener("click", (event) => {
-    const button = event.target.closest("[data-filter]");
+
+  $("#panel-today").addEventListener("click", (event) => {
+    if (event.target.closest("#prev-day")) shiftDay(-1);
+    else if (event.target.closest("#next-day")) shiftDay(1);
+    else if (event.target.closest("#jump-back")) selectDate(anchorDate());
+  });
+
+  $("#panel-week").addEventListener("click", (event) => {
+    const button = event.target.closest("[data-day]");
     if (!button) return;
-    state.filter = button.dataset.filter;
-    render();
+    const date = button.dataset.day;
+    state.openDay = state.openDay === date ? "" : date;
+    renderWeek();
+    document.querySelector(`[data-day="${date}"]`)?.focus();
   });
-  $("#prev-day").addEventListener("click", () => selectDate(addDaysISO(state.selectedDate, -1)));
-  $("#next-day").addEventListener("click", () => selectDate(addDaysISO(state.selectedDate, 1)));
-  $("#jump-today").addEventListener("click", () => selectDate(berlinDateISO(new Date())));
-  $("#quit-toggle").addEventListener("click", () => setQuitCollapsed(!state.quitCollapsed));
-  $("#reset-all").addEventListener("click", () => {
-    const ok = window.confirm("Clear every quit-timer date saved in this browser?");
-    if (!ok) return;
-    try {
-      localStorage.removeItem(OVERRIDE_KEY);
-    } catch {
-      return;
-    }
-    for (const timer of state.timers) applyTimerStart(timer.id, timer.defaultStart, { override: false });
+
+  $("#panel-quit").addEventListener("click", (event) => {
+    const button = event.target.closest("[data-edit]");
+    if (!button) return;
+    openEditor(button.dataset.edit);
   });
-  $("#sheet-backdrop").addEventListener("click", closeSheet);
-  $("#sheet-cancel").addEventListener("click", closeSheet);
-  $("#sheet-restart").addEventListener("click", () => {
-    if (state.sheetId) restartTimer(state.sheetId);
+
+  $("#editor-backdrop").addEventListener("click", closeEditor);
+  $("#editor-cancel").addEventListener("click", closeEditor);
+  $("#editor-restart").addEventListener("click", () => {
+    if (state.editorId) restartTimer(state.editorId);
   });
-  $("#sheet-reset").addEventListener("click", () => {
-    const timer = state.timers.find((item) => item.id === state.sheetId);
+  $("#editor-reset").addEventListener("click", () => {
+    const timer = state.timers.find((item) => item.id === state.editorId);
     if (!timer) return;
     const ok = window.confirm(`Use the start date from quit-timers.json for “${timer.label}”?`);
     if (!ok) return;
     try {
       saveOverride(timer.id, timer.defaultStart);
-      closeSheet();
+      closeEditor();
     } catch (err) {
-      const error = $("#sheet-error");
+      const error = $("#editor-error");
       error.hidden = false;
       error.textContent = err.message || "Could not reset that date.";
     }
   });
-  $("#sheet-form").addEventListener("submit", (event) => {
+  $("#editor-form").addEventListener("submit", (event) => {
     event.preventDefault();
-    const timer = state.timers.find((item) => item.id === state.sheetId);
+    const timer = state.timers.find((item) => item.id === state.editorId);
     if (!timer) return;
-    const error = $("#sheet-error");
+    const error = $("#editor-error");
     try {
-      const iso = berlinLocalToISO($("#sheet-input").value);
+      const iso = berlinLocalToISO($("#editor-input").value);
       if (Number.isNaN(Date.parse(iso))) throw new Error("That date did not parse.");
       saveOverride(timer.id, iso);
-      closeSheet();
+      closeEditor();
     } catch (err) {
       error.hidden = false;
       error.textContent = err.message || "Could not save that date.";
     }
   });
+
   document.addEventListener("keydown", (event) => {
-    if ($("#sheet").hidden) return;
+    const editorOpen = !$("#editor").hidden;
+    const aboutOpen = !$("#about").hidden;
+    if (!editorOpen && !aboutOpen) return;
     if (event.key === "Escape") {
       event.preventDefault();
-      closeSheet();
+      if (editorOpen) closeEditor();
+      else closeAbout();
       return;
     }
     if (event.key !== "Tab") return;
-    const focusable = sheetFocusable();
-    if (!focusable.length) return;
-    const first = focusable[0];
-    const last = focusable[focusable.length - 1];
-    if (event.shiftKey && document.activeElement === first) {
-      event.preventDefault();
-      last.focus();
-    } else if (!event.shiftKey && document.activeElement === last) {
-      event.preventDefault();
-      first.focus();
-    }
+    trapSheet(editorOpen ? $("#editor-panel") : $("#about-panel"), event);
+  });
+
+  window.addEventListener("hashchange", () => {
+    const tab = readTab();
+    if (tab === state.tab) return;
+    applyTab(tab);
+    window.scrollTo(0, 0);
   });
 }
 
 async function init() {
-  state.tab = initialTab();
+  state.tab = readTab();
   state.selectedDate = berlinDateISO(new Date());
-  state.viewMonth = state.selectedDate.slice(0, 7);
-  try {
-    state.quitCollapsed = localStorage.getItem(COLLAPSE_KEY) === "1";
-  } catch {
-    state.quitCollapsed = false;
-  }
-  bindControls();
-  renderLegend();
-  setQuitCollapsed(state.quitCollapsed);
-  paintClock();
-  setInterval(tick, 1000);
+  writeHash(state.tab);
+  applyTab(state.tab);
+  bind();
 
   const [quit, day, week, fitness, history] = await Promise.all([
     loadJson("data/quit-timers.json"),
@@ -979,21 +897,15 @@ async function init() {
   state.week = week.data;
   state.fitness = fitness.data;
   state.history = history.data;
-
-  if (state.day?.date) {
-    state.selectedDate = state.day.date;
-    state.viewMonth = state.day.date.slice(0, 7);
-  }
-
-  renderQuit(quit.data);
-  const sample = Boolean((state.day && state.day.sample) || (state.week && state.week.sample));
-  $("#sample-banner").hidden = !sample;
   if (quit.data?.timezone && quit.data.timezone !== TZ) {
-    const tz = $("#quit-tz");
-    tz.hidden = false;
-    tz.textContent = `File timezone is ${quit.data.timezone}. This page still shows Europe/Berlin.`;
+    state.quitTzNote = `File timezone is ${quit.data.timezone}. This page still shows Europe/Berlin.`;
   }
-  render();
+  if (!state.userPickedDate && state.day?.date) state.selectedDate = state.day.date;
+  loadTimers(quit.data);
+  renderDays();
+  renderQuit();
+  renderAbout();
+  setInterval(tick, 1000);
 }
 
 init();

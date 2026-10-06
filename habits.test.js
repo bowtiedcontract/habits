@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { formatBerlinHM } from "./time.js";
 import {
   addDaysISO,
   buildMonth,
@@ -13,6 +14,7 @@ import {
   mondayOf,
   shiftMonth,
   summarize,
+  summarizeDayCells,
   syncLine,
   syncMessage,
   todayLists,
@@ -215,7 +217,7 @@ assert.equal(
     selectedDate: "2026-10-05",
     hasDailyItems: true,
   }),
-  "Today's sync hasn't arrived yet. Showing Mon 5 Oct."
+  "Waiting for today's update from Todoist. Showing Monday 5 Oct."
 );
 assert.equal(
   syncMessage({
@@ -233,7 +235,7 @@ assert.match(
     selectedDate: "2026-10-06",
     hasDailyItems: false,
   }),
-  /Nothing synced for Tue 6 Oct/
+  /Nothing synced for Tuesday 6 Oct/
 );
 
 const month = buildMonth({
@@ -247,8 +249,8 @@ assert.equal(month.any, true);
 assert.equal(month.cells[0], null);
 const oct5 = month.cells.find((cell) => cell && cell.date === day.date);
 assert.equal(oct5.percent, Math.round((100 * glance.daily.done) / glance.daily.total));
-const oct6 = month.cells.find((cell) => cell && cell.date === "2026-10-06");
-assert.equal(oct6.percent, null);
+const outsideDay = month.cells.find((cell) => cell && cell.date === "2026-10-07");
+assert.equal(outsideDay.percent, null);
 const september = buildMonth({
   monthKey: "2026-09",
   day,
@@ -274,7 +276,27 @@ assert.deepEqual(
   week.workouts.map((item) => item.name)
 );
 assert.equal(feed.also.length, 0);
-assert.equal(syncLine(day.updated, week.updated), "Last synced 22:14 (Berlin)");
+const dayHM = formatBerlinHM(day.updated);
+const weekHM = formatBerlinHM(week.updated);
+assert.equal(
+  syncLine(day.updated, week.updated),
+  dayHM === weekHM ? `Last synced ${dayHM} (Berlin)` : `Last synced day ${dayHM} · week ${weekHM} (Berlin)`
+);
 assert.equal(syncLine("2026-10-05T21:00:00+02:00", "2026-10-05T22:14:00+02:00"), "Last synced day 21:00 · week 22:14 (Berlin)");
+
+const fileDay = summarizeDayCells(live.rows, day.date);
+assert.equal(fileDay.tone, "scored");
+assert.equal(
+  fileDay.done,
+  day.items.filter((item) => item.status === "completed" && item.planned !== false).length
+);
+assert.equal(fileDay.total, day.items.filter((item) => item.planned !== false).length);
+const dayAfter = addDaysISO(day.date, 1);
+if (dayAfter && dayAfter > "2026-10-06" && dayAfter <= week.weekEnd) {
+  assert.equal(summarizeDayCells(live.rows, dayAfter).tone, "upcoming");
+}
+if (week.weekStart < day.date) {
+  assert.equal(summarizeDayCells(live.rows, week.weekStart).tone, "empty");
+}
 
 console.log("habits tests passed");
