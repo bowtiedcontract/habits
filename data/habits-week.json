@@ -6,13 +6,13 @@
   "sample": false,
   "updated": "2026-10-06T07:30:00+02:00",
   "source": "todoist",
-  "percentDone": 13,
+  "percentDone": 20,
   "counts": {
     "planned": 15,
-    "completed": 2,
+    "completed": 3,
     "skipped": 0,
     "missed": 3,
-    "open": 10
+    "open": 9
   },
   "completed": [
     {
@@ -23,6 +23,11 @@
     {
       "id": "vitamins-evening",
       "name": "Evening vitamins",
+      "when": "Mon 5 Oct"
+    },
+    {
+      "id": "bouldering",
+      "name": "Bouldering (Monday climb)",
       "when": "Mon 5 Oct"
     }
   ],
@@ -58,7 +63,7 @@
     {
       "id": "bouldering",
       "name": "Bouldering",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "id": "abs-forearms",
