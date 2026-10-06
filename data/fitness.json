@@ -1,17 +1,18 @@
 {
   "schemaVersion": 1,
-  "updated": "2026-10-05T22:15:00+02:00",
+  "updated": "2026-10-06T23:18:00+02:00",
   "weekOf": "2026-10-05",
   "sundayRecap": "",
   "stats": [
     { "label": "Workouts done", "value": "1" },
-    { "label": "Still planned this week", "value": "5" }
+    { "label": "Still planned this week", "value": "4" },
+    { "label": "Skipped", "value": "1" }
   ],
   "workouts": [
     {
       "date": "2026-10-05",
       "name": "Bouldering",
-      "detail": "Unplanned, 17:10–18:10 (60 min). Monday's Couch to 5K run moved to Tuesday."
+      "detail": "Unplanned, 17:10–18:10 (60 min)."
     }
   ]
 }
