@@ -3,8 +3,14 @@ import { readFileSync } from "node:fs";
 import {
   berlinDateISO,
   berlinLocalToISO,
+  formatBerlinHM,
   formatElapsed,
+  formatElapsedCompact,
+  formatMonthLabel,
+  formatShortDay,
+  formatWeekSpan,
   toDatetimeLocalValue,
+  weekdayNarrow,
 } from "./time.js";
 
 assert.equal(berlinLocalToISO("2026-09-17T21:38"), "2026-09-17T21:38:00+02:00");
@@ -47,6 +53,26 @@ assert.equal(berlinDateISO(new Date("2026-10-05T21:15:00+02:00")), "2026-10-05")
 assert.equal(berlinDateISO(new Date("2026-10-05T23:30:00Z")), "2026-10-06");
 
 assert.throws(() => berlinLocalToISO("yesterday"), /date/i);
+
+assert.equal(formatShortDay("2026-10-05"), "Mon 5 Oct");
+assert.equal(formatShortDay("2026-10-06"), "Tue 6 Oct");
+assert.equal(formatWeekSpan("2026-10-05", "2026-10-11"), "5–11 Oct");
+assert.equal(formatWeekSpan("2026-09-28", "2026-10-04"), "28 Sep – 4 Oct");
+assert.equal(weekdayNarrow("2026-10-05"), "M");
+assert.equal(weekdayNarrow("2026-10-08"), "T");
+assert.equal(formatBerlinHM("2026-10-05T22:14:00+02:00"), "22:14");
+assert.equal(formatBerlinHM("2026-01-15T08:05:00+01:00"), "08:05");
+assert.equal(formatMonthLabel("2026-10"), "October 2026");
+
+const compactDays = formatElapsedCompact(
+  Date.parse("2026-10-05T21:15:00+02:00") - Date.parse("2026-09-17T21:38:00+02:00")
+);
+assert.equal(compactDays.text, "17d 23h");
+const compactHours = formatElapsedCompact(sameEvening);
+assert.equal(compactHours.text, "17h 32m");
+const compactMinutes = formatElapsedCompact(125000);
+assert.equal(compactMinutes.text, "2m 5s");
+assert.equal(formatElapsedCompact(Number.NaN).text, "—");
 
 const STATUSES = new Set(["completed", "skipped", "missed", "planned"]);
 const quit = JSON.parse(readFileSync(new URL("./data/quit-timers.json", import.meta.url)));
