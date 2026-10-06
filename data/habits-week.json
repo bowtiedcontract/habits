@@ -4,15 +4,15 @@
   "weekStart": "2026-10-05",
   "weekEnd": "2026-10-11",
   "sample": false,
-  "updated": "2026-10-06T20:12:00+02:00",
+  "updated": "2026-10-06T21:11:00+02:00",
   "source": "todoist",
   "percentDone": 38,
   "counts": {
     "planned": 13,
     "completed": 5,
-    "skipped": 1,
+    "skipped": 0,
     "missed": 2,
-    "open": 5
+    "open": 6
   },
   "completed": [
     {
@@ -53,18 +53,12 @@
       "when": "Mon 5 Oct"
     }
   ],
-  "skipped": [
-    {
-      "id": "couch-to-5k",
-      "name": "Couch to 5K (tired, cleaned house instead)",
-      "when": "Tue 6 Oct"
-    }
-  ],
+  "skipped": [],
   "workouts": [
     {
       "id": "couch-to-5k",
       "name": "Couch to 5K",
-      "status": "skipped"
+      "status": "planned"
     },
     {
       "id": "sprints",
