@@ -1,16 +1,12 @@
 {
   "schemaVersion": 1,
-  "updated": "2026-10-07T10:55:00+02:00",
+  "updated": "2026-10-07T20:52:00+02:00",
   "weekOf": "2026-10-05",
   "sundayRecap": "",
   "stats": [
     {
       "label": "Workouts done",
-      "value": "1"
-    },
-    {
-      "label": "Still planned this week",
-      "value": "3"
+      "value": "2"
     },
     {
       "label": "Skipped",
@@ -22,6 +18,11 @@
       "date": "2026-10-05",
       "name": "Bouldering",
       "detail": "Unplanned, 17:10–18:10 (60 min)."
+    },
+    {
+      "date": "2026-10-07",
+      "name": "Gym",
+      "detail": "Evening session, 20:00–21:15 (75 min)."
     }
   ]
 }
