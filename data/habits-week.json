@@ -110,6 +110,7 @@
   ],
   "workoutTotal": {
     "target": 5,
-    "done": 0
+    "done": 0,
+    "label": "Gym sessions"
   }
 }
