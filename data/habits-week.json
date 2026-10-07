@@ -4,13 +4,13 @@
   "weekStart": "2026-10-05",
   "weekEnd": "2026-10-11",
   "sample": false,
-  "updated": "2026-10-07T17:37:00+02:00",
+  "updated": "2026-10-07T21:00:00+02:00",
   "source": "todoist",
-  "percentDone": 24,
+  "percentDone": 29,
   "counts": {
     "planned": 21,
-    "completed": 5,
-    "skipped": 2,
+    "completed": 6,
+    "skipped": 1,
     "missed": 4,
     "open": 10
   },
@@ -39,6 +39,11 @@
       "id": "investing",
       "name": "Investing check",
       "when": "Tue 6 Oct"
+    },
+    {
+      "id": "gym",
+      "name": "Gym (05:00, tired)",
+      "when": "Wed 7 Oct"
     }
   ],
   "missed": [
@@ -65,11 +70,6 @@
   ],
   "skipped": [
     {
-      "id": "gym",
-      "name": "Gym (05:00, tired)",
-      "when": "Wed 7 Oct"
-    },
-    {
       "id": "couch-to-5k",
       "name": "Couch to 5K makeup run (tired)",
       "when": "Wed 7 Oct"
@@ -80,7 +80,7 @@
       "id": "gym",
       "name": "Gym",
       "target": 5,
-      "done": 0,
+      "done": 1,
       "status": "planned"
     },
     {
@@ -121,7 +121,7 @@
   ],
   "workoutTotal": {
     "target": 5,
-    "done": 0,
+    "done": 1,
     "label": "Gym sessions"
   }
 }
