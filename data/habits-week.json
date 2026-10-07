@@ -115,8 +115,8 @@
       "id": "yoga",
       "name": "Yoga",
       "target": 1,
-      "done": 0,
-      "status": "planned"
+      "done": 1,
+      "status": "completed"
     }
   ],
   "workoutTotal": {
