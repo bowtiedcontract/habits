@@ -66,6 +66,13 @@
   "skipped": [],
   "workouts": [
     {
+      "id": "gym",
+      "name": "Gym",
+      "target": 5,
+      "done": 0,
+      "status": "planned"
+    },
+    {
       "id": "couch-to-5k",
       "name": "Couch to 5K",
       "target": 2,
@@ -103,6 +110,6 @@
   ],
   "workoutTotal": {
     "target": 5,
-    "done": 1
+    "done": 0
   }
 }
