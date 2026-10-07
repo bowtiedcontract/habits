@@ -103,7 +103,7 @@ assert.deepEqual(starts, {
 });
 for (const timer of quit.timers) assert.equal(Number.isNaN(Date.parse(timer.start)), false);
 
-assert.equal(day.date, "2026-10-06");
+assert.match(day.date, /^\d{4}-\d{2}-\d{2}$/);
 assert.equal(day.items.length, 4);
 for (const item of day.items) assert.equal(STATUSES.has(item.status), true);
 

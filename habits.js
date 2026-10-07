@@ -96,6 +96,54 @@ export function weekStatusKind(status) {
   return "open";
 }
 
+function wholeNumber(value) {
+  return Number.isInteger(value) ? value : null;
+}
+
+export function workoutQuota(item) {
+  const target = wholeNumber(item?.target);
+  if (target == null || target < 1) return null;
+  const raw = wholeNumber(item.done);
+  const done = raw == null ? 0 : Math.max(0, raw);
+  return { done, target, met: done >= target };
+}
+
+export function workoutWeekSummary({ workouts, workoutTotal, current = true } = {}) {
+  const tail = current ? " this week" : "";
+  const totalTarget = wholeNumber(workoutTotal?.target);
+  if (workoutTotal && typeof workoutTotal === "object" && totalTarget != null && totalTarget >= 0) {
+    const raw = wholeNumber(workoutTotal.done);
+    const done = raw == null ? 0 : Math.max(0, raw);
+    return { mode: "total", done, target: totalTarget, text: `Workouts ${done} / ${totalTarget}${tail}` };
+  }
+  const list = (Array.isArray(workouts) ? workouts : []).filter((item) => item && item.planned !== false);
+  const usesQuota = list.some((item) => workoutQuota(item));
+  if (!usesQuota) {
+    const summary = summarize(list);
+    return { mode: "status", done: summary.done, target: summary.total, text: `${summary.done} of ${summary.total}${tail}` };
+  }
+  let done = 0;
+  let target = 0;
+  for (const item of list) {
+    const quota = workoutQuota(item);
+    if (quota) {
+      done += Math.min(quota.done, quota.target);
+      target += quota.target;
+    } else {
+      target += 1;
+      if (item.status === "completed") done += 1;
+    }
+  }
+  return { mode: "sum", done, target, text: `${done} of ${target}${tail}` };
+}
+
+function assignWorkoutQuota(row, item) {
+  const quota = workoutQuota(item);
+  if (!quota) return;
+  row.target = quota.target;
+  row.done = quota.done;
+}
+
 function indexHistory(history) {
   const byDate = new Map();
   const days = Array.isArray(history?.days) ? history.days : [];
@@ -151,16 +199,19 @@ export function buildWeek({ day, week, history, todayISO, focusDate }) {
       if (item.name) existing.name = String(item.name);
       if (repeats) existing.repeats = true;
       if (cat === "workout" && item.status) existing.weekStatus = item.status;
+      if (cat === "workout") assignWorkoutQuota(existing, item);
       return;
     }
-    rows.push({
+    const row = {
       key,
       id,
       name: String(item.name || id),
       category: cat,
       repeats: Boolean(repeats),
       weekStatus: cat === "workout" && item.status ? item.status : null,
-    });
+    };
+    if (cat === "workout") assignWorkoutQuota(row, item);
+    rows.push(row);
   }
 
   for (const item of Array.isArray(day?.items) ? day.items : []) touch(item, "daily", true);
@@ -267,12 +318,18 @@ export function summarizeDayCells(rows, date) {
     total += 1;
     if (cell.kind === "completed") done += 1;
     if (cell.kind === "upcoming") upcoming += 1;
-    details.push({
+    const detail = {
       id: row.id,
       name: row.name,
       kind: cell.kind,
       category: row.category,
-    });
+    };
+    const quota = row.category === "workout" ? workoutQuota(row) : null;
+    if (quota) {
+      detail.target = quota.target;
+      detail.done = quota.done;
+    }
+    details.push(detail);
   }
   let tone = "empty";
   if (total > 0) tone = upcoming === total ? "upcoming" : "scored";
