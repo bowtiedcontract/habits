@@ -23,6 +23,8 @@ import {
   syncMessage,
   todayLists,
   weekStatusKind,
+  workoutQuota,
+  workoutWeekSummary,
 } from "./habits.js";
 
 const OVERRIDE_KEY = "habits.quitTimerOverrides";
@@ -428,15 +430,48 @@ function closeEditor() {
   if (back && typeof back.focus === "function") back.focus();
 }
 
-function habitCard(item, kind, subtitle) {
+function doneMark() {
+  const span = el("span", "mark mark-done");
+  span.setAttribute("aria-hidden", "true");
+  span.append(svgIcon(["M20 6L9 17l-5-5"], 20));
+  return span;
+}
+
+function quotaBar(quota) {
+  const bar = el("span", quota.met ? "quota-bar is-full" : "quota-bar");
+  bar.setAttribute("role", "progressbar");
+  bar.setAttribute("aria-valuemin", "0");
+  bar.setAttribute("aria-valuemax", String(quota.target));
+  bar.setAttribute("aria-valuenow", String(Math.min(quota.done, quota.target)));
+  bar.setAttribute("aria-label", `${quota.done} of ${quota.target}`);
+  const fill = el("span");
+  fill.style.width = `${Math.round((100 * Math.min(quota.done, quota.target)) / quota.target)}%`;
+  bar.append(fill);
+  return bar;
+}
+
+function quotaReadout(name, quota) {
+  const wrap = el("div", "status");
+  wrap.append(el("span", "quota-count", `${quota.done} / ${quota.target}`));
+  if (quota.met) {
+    wrap.append(doneMark());
+    wrap.append(el("span", "sr-only", `${name}, done`));
+  }
+  return wrap;
+}
+
+function habitCard(item, kind, subtitle, options = {}) {
+  const quota = options.track ? workoutQuota(item) : null;
   const card = el("article", "hcard");
-  card.dataset.kind = kind;
+  card.dataset.kind = quota ? (quota.met ? "completed" : "open") : kind;
   card.append(habitIcon(item.id, item.name));
   const copy = el("div");
   copy.append(el("h3", "hname", item.name || item.id || "Habit"));
   copy.append(el("p", "hsub", subtitle));
+  if (quota) copy.append(quotaBar(quota));
   card.append(copy);
-  card.append(statusNode(kind));
+  const label = item.name || item.id || "Habit";
+  card.append(quota ? quotaReadout(label, quota) : statusNode(kind));
   return card;
 }
 
@@ -573,18 +608,16 @@ function renderToday() {
   const workouts = (Array.isArray(week?.workouts) ? week.workouts : []).filter((item) => item && (item.id || item.name));
   if (!workouts.length) return;
   const glance = glanceModel({ day, week, todayISO });
-  const summary = summarize(workouts);
+  const summary = workoutWeekSummary({
+    workouts,
+    workoutTotal: week?.workoutTotal,
+    current: glance.weekIsCurrent,
+  });
   root.append(el("h2", "section-title", glance.weekIsCurrent ? "This week's workouts" : "Workouts"));
-  root.append(
-    el(
-      "p",
-      "count-line",
-      glance.weekIsCurrent ? `${summary.done} of ${summary.total} this week` : `${summary.done} of ${summary.total}`
-    )
-  );
+  root.append(el("p", "count-line", summary.text));
   const stack = el("div", "stack");
   for (const item of workouts) {
-    stack.append(habitCard(item, weekStatusKind(item.status), "This week"));
+    stack.append(habitCard(item, weekStatusKind(item.status), "This week", { track: true }));
   }
   root.append(stack);
 }
@@ -626,8 +659,12 @@ function dayCard(model, todayISO) {
     }
     for (const detail of model.details) {
       const line = el("div", "dayline");
-      line.append(el("p", "dayline-name", detail.name));
-      line.append(statusNode(detail.kind));
+      const quota = detail.category === "workout" ? workoutQuota(detail) : null;
+      const copy = el("div");
+      copy.append(el("p", "dayline-name", detail.name));
+      if (quota) copy.append(quotaBar(quota));
+      line.append(copy);
+      line.append(quota ? quotaReadout(detail.name, quota) : statusNode(detail.kind));
       body.append(line);
     }
     article.append(body);

@@ -295,6 +295,37 @@ h1 {
 
 .status-word.miss { color: #ffd5dc; }
 
+.quota-count {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.quota-bar {
+  display: block;
+  height: 6px;
+  margin-top: 8px;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.12);
+  overflow: hidden;
+}
+
+.quota-bar > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #f4f0ff;
+}
+
+.quota-bar.is-full > span { background: var(--done); }
+
+.dayline .quota-count { font-size: 20px; }
+
+.dayline .quota-bar { margin-top: 6px; }
+
 .mark {
   width: 36px;
   height: 36px;

@@ -20,6 +20,8 @@ import {
   todayLists,
   weekDates,
   weekStatusKind,
+  workoutQuota,
+  workoutWeekSummary,
 } from "./habits.js";
 
 const day = JSON.parse(readFileSync(new URL("./data/habits-day.json", import.meta.url)));
@@ -249,7 +251,8 @@ assert.equal(month.any, true);
 assert.equal(month.cells[0], null);
 const oct5 = month.cells.find((cell) => cell && cell.date === day.date);
 assert.equal(oct5.percent, Math.round((100 * glance.daily.done) / glance.daily.total));
-const outsideDay = month.cells.find((cell) => cell && cell.date === "2026-10-07");
+const blankDate = day.date === "2026-10-08" ? "2026-10-09" : "2026-10-08";
+const outsideDay = month.cells.find((cell) => cell && cell.date === blankDate);
 assert.equal(outsideDay.percent, null);
 const september = buildMonth({
   monthKey: "2026-09",
@@ -285,7 +288,10 @@ assert.equal(
 assert.equal(syncLine("2026-10-05T21:00:00+02:00", "2026-10-05T22:14:00+02:00"), "Last synced day 21:00 · week 22:14 (Berlin)");
 
 const fileDay = summarizeDayCells(live.rows, day.date);
-assert.equal(fileDay.tone, "scored");
+const fileKinds = day.items
+  .filter((item) => item.planned !== false)
+  .map((item) => kindFromItem(item, day.date, "2026-10-06"));
+assert.equal(fileDay.tone, fileKinds.length && fileKinds.every((kind) => kind === "upcoming") ? "upcoming" : "scored");
 assert.equal(
   fileDay.done,
   day.items.filter((item) => item.status === "completed" && item.planned !== false).length
@@ -298,5 +304,78 @@ if (dayAfter && dayAfter > "2026-10-06" && dayAfter <= week.weekEnd) {
 if (week.weekStart < day.date) {
   assert.equal(summarizeDayCells(live.rows, week.weekStart).tone, "empty");
 }
+
+assert.equal(workoutQuota({ status: "completed" }), null);
+assert.equal(workoutQuota({ target: 0, done: 0 }), null);
+assert.equal(workoutQuota({ target: 1.5, done: 1 }), null);
+assert.deepEqual(workoutQuota({ target: 2, done: 1, status: "planned" }), { done: 1, target: 2, met: false });
+assert.equal(workoutQuota({ target: 2 }).done, 0);
+assert.equal(workoutQuota({ target: 2, done: -3 }).done, 0);
+assert.equal(workoutQuota({ target: 2, done: 2 }).met, true);
+assert.equal(workoutQuota({ target: 2, done: 5 }).met, true);
+
+const quotaWeek = {
+  workouts: [
+    { id: "couch-to-5k", name: "Couch to 5K", target: 2, done: 3, status: "planned" },
+    { id: "sprints", name: "Sprints", target: 1, done: 0, status: "planned" },
+    { id: "yoga", name: "Yoga", status: "completed" },
+    { id: "rest", name: "Rest", status: "planned", planned: false, target: 4, done: 4 },
+  ],
+};
+assert.equal(
+  workoutWeekSummary({ workouts: quotaWeek.workouts, current: true }).text,
+  "3 of 4 this week"
+);
+assert.equal(
+  workoutWeekSummary({
+    workouts: quotaWeek.workouts,
+    workoutTotal: { target: 5, done: 2 },
+    current: true,
+  }).text,
+  "Workouts 2 / 5 this week"
+);
+assert.equal(
+  workoutWeekSummary({
+    workouts: [{ status: "completed" }, { status: "planned" }],
+    current: false,
+  }).text,
+  "1 of 2"
+);
+assert.equal(
+  workoutWeekSummary({ workouts: [], workoutTotal: { target: 5, done: 2 }, current: false }).text,
+  "Workouts 2 / 5"
+);
+assert.equal(workoutWeekSummary({ workoutTotal: { done: 1 }, current: true }).mode, "status");
+
+const quotaBuilt = buildWeek({
+  day,
+  week: {
+    ...week,
+    workouts: [
+      { id: "bouldering", name: "Bouldering", target: 2, done: 1, status: "planned" },
+      { id: "yoga", name: "Yoga", status: "planned" },
+    ],
+  },
+  history: {
+    days: [
+      {
+        date: "2026-10-05",
+        items: [{ id: "bouldering", name: "Bouldering", category: "workout", status: "completed" }],
+      },
+    ],
+  },
+  todayISO: "2026-10-07",
+  focusDate: "2026-10-05",
+});
+const boulder = quotaBuilt.rows.find((row) => row.id === "bouldering");
+assert.equal(boulder.target, 2);
+assert.equal(boulder.done, 1);
+assert.equal(boulder.mode, "days");
+const boulderDay = summarizeDayCells(quotaBuilt.rows, "2026-10-05").details.find((detail) => detail.id === "bouldering");
+assert.equal(boulderDay.target, 2);
+assert.equal(boulderDay.done, 1);
+const yoga = quotaBuilt.rows.find((row) => row.id === "yoga");
+assert.equal(yoga.target, undefined);
+assert.equal(yoga.mode, "week");
 
 console.log("habits tests passed");
