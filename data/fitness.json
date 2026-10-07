@@ -1,12 +1,21 @@
 {
   "schemaVersion": 1,
-  "updated": "2026-10-06T23:18:00+02:00",
+  "updated": "2026-10-07T10:55:00+02:00",
   "weekOf": "2026-10-05",
   "sundayRecap": "",
   "stats": [
-    { "label": "Workouts done", "value": "1" },
-    { "label": "Still planned this week", "value": "4" },
-    { "label": "Skipped", "value": "1" }
+    {
+      "label": "Workouts done",
+      "value": "1"
+    },
+    {
+      "label": "Still planned this week",
+      "value": "3"
+    },
+    {
+      "label": "Skipped",
+      "value": "2"
+    }
   ],
   "workouts": [
     {
