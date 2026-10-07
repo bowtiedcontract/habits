@@ -100,6 +100,11 @@ function wholeNumber(value) {
   return Number.isInteger(value) ? value : null;
 }
 
+function workoutTotalLabel(workoutTotal) {
+  const raw = typeof workoutTotal?.label === "string" ? workoutTotal.label.trim() : "";
+  return raw || "Workouts";
+}
+
 export function workoutQuota(item) {
   const target = wholeNumber(item?.target);
   if (target == null || target < 1) return null;
@@ -114,7 +119,8 @@ export function workoutWeekSummary({ workouts, workoutTotal, current = true } = 
   if (workoutTotal && typeof workoutTotal === "object" && totalTarget != null && totalTarget >= 0) {
     const raw = wholeNumber(workoutTotal.done);
     const done = raw == null ? 0 : Math.max(0, raw);
-    return { mode: "total", done, target: totalTarget, text: `Workouts ${done} / ${totalTarget}${tail}` };
+    const label = workoutTotalLabel(workoutTotal);
+    return { mode: "total", done, target: totalTarget, text: `${label} ${done} / ${totalTarget}${tail}` };
   }
   const list = (Array.isArray(workouts) ? workouts : []).filter((item) => item && item.planned !== false);
   const usesQuota = list.some((item) => workoutQuota(item));

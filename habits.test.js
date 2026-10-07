@@ -345,6 +345,27 @@ assert.equal(
   workoutWeekSummary({ workouts: [], workoutTotal: { target: 5, done: 2 }, current: false }).text,
   "Workouts 2 / 5"
 );
+assert.equal(
+  workoutWeekSummary({
+    workoutTotal: { target: 5, done: 0, label: "Gym sessions" },
+    current: true,
+  }).text,
+  "Gym sessions 0 / 5 this week"
+);
+assert.equal(
+  workoutWeekSummary({
+    workoutTotal: { target: 5, done: 1, label: "  " },
+    current: false,
+  }).text,
+  "Workouts 1 / 5"
+);
+assert.equal(
+  workoutWeekSummary({
+    workoutTotal: { target: 5, done: 1, label: 4 },
+    current: true,
+  }).text,
+  "Workouts 1 / 5 this week"
+);
 assert.equal(workoutWeekSummary({ workoutTotal: { done: 1 }, current: true }).mode, "status");
 
 const quotaBuilt = buildWeek({
