@@ -1,4 +1,4 @@
-import { formatBerlinHM, formatShortDay } from "./time.js";
+import { formatBerlinHM, formatShortDay, formatSpokenDay } from "./time.js";
 
 export const KIND_LABEL = {
   completed: "Done",
@@ -246,12 +246,37 @@ export function glanceModel({ day, week, todayISO }) {
 export function syncMessage({ dayDate, todayISO, selectedDate, hasDailyItems }) {
   if (!todayISO || !selectedDate) return "";
   if (dayDate && dayDate < todayISO && selectedDate === dayDate) {
-    return `Today's sync hasn't arrived yet. Showing ${formatShortDay(dayDate)}.`;
+    return `Waiting for today's update from Todoist. Showing ${formatSpokenDay(dayDate)}.`;
   }
   if (selectedDate === todayISO && dayDate !== todayISO && !hasDailyItems) {
-    return `Nothing synced for ${formatShortDay(selectedDate)} yet.`;
+    return `Nothing synced for ${formatSpokenDay(selectedDate)} yet.`;
   }
   return "";
+}
+
+export function summarizeDayCells(rows, date) {
+  const details = [];
+  let done = 0;
+  let total = 0;
+  let upcoming = 0;
+  for (const row of rows || []) {
+    if (!row || row.mode === "week") continue;
+    const cell = (row.cells || []).find((entry) => entry.date === date);
+    if (!cell) continue;
+    if (cell.kind === "norecord" || cell.kind === "unplanned" || cell.kind === "week") continue;
+    total += 1;
+    if (cell.kind === "completed") done += 1;
+    if (cell.kind === "upcoming") upcoming += 1;
+    details.push({
+      id: row.id,
+      name: row.name,
+      kind: cell.kind,
+      category: row.category,
+    });
+  }
+  let tone = "empty";
+  if (total > 0) tone = upcoming === total ? "upcoming" : "scored";
+  return { date, done, total, upcoming, details, tone };
 }
 
 export function feedListing({ day, week, history }) {

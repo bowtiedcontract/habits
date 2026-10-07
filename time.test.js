@@ -7,7 +7,9 @@ import {
   formatElapsed,
   formatElapsedCompact,
   formatMonthLabel,
+  formatQuitClock,
   formatShortDay,
+  formatSpokenDay,
   formatWeekSpan,
   toDatetimeLocalValue,
   weekdayNarrow,
@@ -56,6 +58,8 @@ assert.throws(() => berlinLocalToISO("yesterday"), /date/i);
 
 assert.equal(formatShortDay("2026-10-05"), "Mon 5 Oct");
 assert.equal(formatShortDay("2026-10-06"), "Tue 6 Oct");
+assert.equal(formatSpokenDay("2026-10-05"), "Monday 5 Oct");
+assert.equal(formatSpokenDay("2026-10-06"), "Tuesday 6 Oct");
 assert.equal(formatWeekSpan("2026-10-05", "2026-10-11"), "5–11 Oct");
 assert.equal(formatWeekSpan("2026-09-28", "2026-10-04"), "28 Sep – 4 Oct");
 assert.equal(weekdayNarrow("2026-10-05"), "M");
@@ -73,6 +77,13 @@ assert.equal(compactHours.text, "17h 32m");
 const compactMinutes = formatElapsedCompact(125000);
 assert.equal(compactMinutes.text, "2m 5s");
 assert.equal(formatElapsedCompact(Number.NaN).text, "—");
+assert.equal(formatQuitClock(sameEvening).text, "0d 17h 32m 0s");
+assert.equal(
+  formatQuitClock(Date.parse("2026-10-05T21:15:00+02:00") - Date.parse("2026-09-17T21:38:00+02:00")).text,
+  "17d 23h 37m 0s"
+);
+assert.equal(formatQuitClock(Number.NaN).text, "—");
+assert.equal(formatQuitClock(-5000).future, true);
 
 const STATUSES = new Set(["completed", "skipped", "missed", "planned"]);
 const quit = JSON.parse(readFileSync(new URL("./data/quit-timers.json", import.meta.url)));
@@ -92,8 +103,8 @@ assert.deepEqual(starts, {
 });
 for (const timer of quit.timers) assert.equal(Number.isNaN(Date.parse(timer.start)), false);
 
-assert.equal(day.date, "2026-10-05");
-assert.equal(day.items.length, 5);
+assert.equal(day.date, "2026-10-06");
+assert.equal(day.items.length, 4);
 for (const item of day.items) assert.equal(STATUSES.has(item.status), true);
 
 const counts = week.counts;

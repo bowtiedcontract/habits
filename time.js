@@ -181,6 +181,15 @@ export function formatShortDay(isoDate) {
   return `${weekday} ${parts.day} ${SHORT_MONTHS[parts.month - 1]}`;
 }
 
+export function formatSpokenDay(isoDate) {
+  const parts = splitISODate(isoDate);
+  if (!parts) return isoDate || "";
+  const weekday = new Intl.DateTimeFormat("en-GB", { timeZone: "UTC", weekday: "long" }).format(
+    new Date(Date.UTC(parts.year, parts.month - 1, parts.day))
+  );
+  return `${weekday} ${parts.day} ${SHORT_MONTHS[parts.month - 1]}`;
+}
+
 export function formatWeekSpan(start, end) {
   const left = splitISODate(start);
   const right = splitISODate(end);
@@ -217,6 +226,13 @@ export function formatMonthLabel(monthKey) {
     month: "long",
     year: "numeric",
   }).format(date);
+}
+
+export function formatQuitClock(ms) {
+  const elapsed = formatElapsed(ms);
+  if (!Number.isFinite(ms)) return { text: "—", spoken: elapsed.spoken, future: false };
+  const { days, hours, minutes, seconds, future, spoken } = elapsed;
+  return { text: `${days}d ${hours}h ${minutes}m ${seconds}s`, spoken, future };
 }
 
 export function formatElapsedCompact(ms) {

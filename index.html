@@ -3,113 +3,103 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#070a12">
-  <meta name="description" content="Habits dashboard: quit streaks and what Todoist recorded.">
+  <meta name="theme-color" content="#110818">
+  <meta name="description" content="Habits: today's plan, the week, and quit streaks.">
   <meta name="robots" content="noindex">
   <title>Habits</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect fill='%2312141a' width='16' height='16'/%3E%3Ccircle fill='%239fd7b8' cx='8' cy='8' r='4'/%3E%3C/svg%3E">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect fill='%23110818' width='16' height='16'/%3E%3Ccircle fill='%23f4f0ff' cx='8' cy='8' r='4'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="styles.css">
+  <script>
+    (function () {
+      var hash = (location.hash || "").replace(/^#/, "");
+      var query = new URLSearchParams(location.search).get("tab");
+      var tab = hash === "today" || hash === "week" || hash === "quit" ? hash : query;
+      if (tab !== "today" && tab !== "week" && tab !== "quit") tab = "today";
+      document.documentElement.setAttribute("data-tab", tab);
+    })();
+  </script>
   <script type="module" src="app.js"></script>
 </head>
 <body>
   <div class="sky" aria-hidden="true"></div>
   <div class="wrap">
     <header class="top">
-      <div>
-        <p class="eyebrow">Wiesbaden</p>
-        <h1>Habits</h1>
-      </div>
-      <div class="now">
-        <p class="kicker">Now</p>
-        <p id="now-date">—</p>
-        <p id="now-time" class="now-time">—</p>
-      </div>
+      <h1>Habits</h1>
+      <button type="button" id="info-open" class="hit" aria-label="About this page">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="9"></circle>
+          <path d="M12 16v-4M12 8h.01"></path>
+        </svg>
+      </button>
     </header>
-
-    <p id="sample-banner" class="banner" hidden>Sample habit data. Todo BOT will replace the day and week files. Quit timers below are live.</p>
-    <noscript><p class="error">This page needs JavaScript to load the timers and habit files.</p></noscript>
-
+    <noscript><p class="plain">This page needs JavaScript to load the timers and habit files.</p></noscript>
     <main>
-      <section class="glance" aria-label="Progress">
-        <article id="glance-today" class="glance-card"><p class="empty">Loading…</p></article>
-        <article id="glance-week" class="glance-card"><p class="empty">Loading…</p></article>
+      <section id="panel-today" role="tabpanel" aria-labelledby="tab-today">
+        <p class="plain">Loading…</p>
       </section>
-
-      <section aria-labelledby="quit-heading">
-        <div class="section-head">
-          <h2 id="quit-heading">Quit streaks</h2>
-          <button type="button" id="quit-toggle" class="text-btn" aria-expanded="true" aria-controls="quit-panel">Hide</button>
-        </div>
-        <p id="quit-summary" class="quit-summary" hidden></p>
-        <div id="quit-panel">
-          <div id="quit-grid" class="quit-grid">Loading timers…</div>
-          <p class="local-note">Resets save in this browser only.</p>
-          <p id="quit-tz" class="hint" hidden></p>
-          <p class="section-tools"><button id="reset-all" class="text-btn" type="button" hidden>Reset all dates to the file</button></p>
-        </div>
+      <section id="panel-week" role="tabpanel" aria-labelledby="tab-week">
+        <p class="plain">Loading…</p>
       </section>
-
-      <div class="controls">
-        <div id="range-tabs" class="tabs" role="tablist" aria-label="Range">
-          <button type="button" class="tab" role="tab" id="tab-today" data-tab="today" aria-controls="panel-today" aria-selected="true">Today</button>
-          <button type="button" class="tab" role="tab" id="tab-week" data-tab="week" aria-controls="panel-week" aria-selected="false" tabindex="-1">Week</button>
-          <button type="button" class="tab" role="tab" id="tab-month" data-tab="month" aria-controls="panel-month" aria-selected="false" tabindex="-1">Month</button>
-        </div>
-        <div class="filters" role="radiogroup" aria-label="Category">
-          <button type="button" class="filter is-on" role="radio" data-filter="all" aria-checked="true">All</button>
-          <button type="button" class="filter" role="radio" data-filter="daily" aria-checked="false">Daily core</button>
-          <button type="button" class="filter" role="radio" data-filter="workout" aria-checked="false">Workouts</button>
-        </div>
-        <div class="date-nav">
-          <button type="button" id="prev-day" class="icon-btn" aria-label="Previous day">‹</button>
-          <div class="date-readout">
-            <p class="kicker">Viewing</p>
-            <p id="view-date" aria-live="polite">—</p>
-          </div>
-          <button type="button" id="next-day" class="icon-btn" aria-label="Next day">›</button>
-          <button type="button" id="jump-today" class="today-jump">Today</button>
-        </div>
-        <p id="sync-note" class="sync-note" hidden></p>
-        <div id="legend" class="legend" role="list" aria-label="Status"></div>
-        <p class="readonly-note">Read-only. Tick habits in Todoist.</p>
-      </div>
-
-      <div id="panel-today" role="tabpanel" aria-labelledby="tab-today" tabindex="0">
-        <p class="empty">Loading today…</p>
-      </div>
-      <div id="panel-week" role="tabpanel" aria-labelledby="tab-week" tabindex="0" hidden></div>
-      <div id="panel-month" role="tabpanel" aria-labelledby="tab-month" tabindex="0" hidden></div>
-
-      <section id="tracked" aria-label="Tracked from Todoist"></section>
-      <section id="fitness" aria-labelledby="fitness-heading"></section>
+      <section id="panel-quit" role="tabpanel" aria-labelledby="tab-quit">
+        <p class="plain">Loading…</p>
+      </section>
     </main>
-
-    <footer class="footer">
-      <p>Europe/Berlin. Quit labels on this page are visible to anyone with the link.</p>
-    </footer>
   </div>
 
-  <div id="sheet" class="sheet" hidden>
-    <button type="button" id="sheet-backdrop" class="sheet-backdrop" aria-label="Close editor"></button>
-    <div id="sheet-panel" class="sheet-panel" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
+  <nav class="tabbar" role="tablist" aria-label="Sections">
+    <button type="button" class="tab" role="tab" id="tab-today" data-tab="today" aria-controls="panel-today" aria-selected="true">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="12" cy="12" r="4"></circle>
+        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
+      </svg>
+      <span>Today</span>
+    </button>
+    <button type="button" class="tab" role="tab" id="tab-week" data-tab="week" aria-controls="panel-week" aria-selected="false" tabindex="-1">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+        <path d="M16 2v4M8 2v4M3 10h18"></path>
+      </svg>
+      <span>Week</span>
+    </button>
+    <button type="button" class="tab" role="tab" id="tab-quit" data-tab="quit" aria-controls="panel-quit" aria-selected="false" tabindex="-1">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 3.5 3z"></path>
+      </svg>
+      <span>Quit</span>
+    </button>
+  </nav>
+
+  <div id="editor" class="sheet" hidden>
+    <button type="button" id="editor-backdrop" class="sheet-backdrop" aria-label="Close editor"></button>
+    <div id="editor-panel" class="sheet-panel" role="dialog" aria-modal="true" aria-labelledby="editor-title">
       <div class="sheet-grab" aria-hidden="true"></div>
-      <h2 id="sheet-title">Edit</h2>
-      <p id="sheet-elapsed"></p>
-      <p id="sheet-since" class="hint"></p>
-      <p id="sheet-source" class="source-tag" hidden>This browser</p>
-      <button id="sheet-restart" class="btn btn-restart" type="button">Restart from now</button>
-      <form id="sheet-form">
-        <label class="field-label" for="sheet-input">Start in Europe/Berlin
-          <input id="sheet-input" type="datetime-local" required step="60">
+      <h2 id="editor-title">Edit</h2>
+      <p id="editor-elapsed" class="editor-elapsed"></p>
+      <p id="editor-since" class="editor-since"></p>
+      <p id="editor-source" class="plain" hidden>Saved in this browser.</p>
+      <button id="editor-restart" class="btn btn-primary" type="button">Restart from now</button>
+      <form id="editor-form">
+        <label class="field" for="editor-input">Start in Europe/Berlin
+          <input id="editor-input" type="datetime-local" required step="60">
         </label>
-        <p id="sheet-error" class="form-error" hidden></p>
+        <p id="editor-error" class="form-error" hidden></p>
         <div class="edit-actions">
           <button class="btn btn-secondary" type="submit">Save</button>
-          <button class="btn btn-secondary" id="sheet-cancel" type="button">Cancel</button>
-          <button class="btn btn-secondary" id="sheet-reset" type="button" hidden>Use file default</button>
+          <button class="btn btn-secondary" id="editor-cancel" type="button">Cancel</button>
+          <button class="btn btn-secondary" id="editor-reset" type="button" hidden>Use file default</button>
         </div>
       </form>
-      <p class="local-note">Saved in this browser only. Phone and laptop do not share these dates.</p>
+      <p class="plain editor-note">Saved in this browser only. Phone and laptop do not share these dates.</p>
+    </div>
+  </div>
+
+  <div id="about" class="sheet" hidden>
+    <button type="button" id="about-backdrop" class="sheet-backdrop" aria-label="Close about"></button>
+    <div id="about-panel" class="sheet-panel" role="dialog" aria-modal="true" aria-labelledby="about-title">
+      <div class="sheet-grab" aria-hidden="true"></div>
+      <h2 id="about-title">About</h2>
+      <div id="about-body"></div>
+      <button type="button" id="about-close" class="btn btn-secondary about-close">Close</button>
     </div>
   </div>
 </body>
