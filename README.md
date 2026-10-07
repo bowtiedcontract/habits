@@ -185,6 +185,7 @@ One Monday–Sunday week in `Europe/Berlin`. `weekStart` and `weekEnd` are inclu
 - `percentDone` may stay in the file. The “X of Y this week” line is `workouts` completed ÷ `workouts` length, not this percent, because the percent mixes daily habits and workouts.
 - `completed`, `missed`, and `skipped` can still be written. Names already in the day file or `workouts` are not repeated. A name that appears only here is listed under “Also in the week file”. `when` is a short label, not a date the grid parses.
 - `workouts` is the weekly training list. The same `status` values as the day file. Without a per-day history entry, the workout keeps one status on the Today tab (Done, Open, Skipped, or Missed). It is not copied onto every day card, so a finished workout does not look like seven finished days.
+- Each `workouts[]` item may have integer `target` (sessions per week) and `done` (sessions completed). Optional top-level `workoutTotal: {target, done}`.
 - Inside `weekStart`–`weekEnd`, daily habits from the day file show their real status on `habits-day.json`’s date. Later days in that week are **Upcoming** until a record exists. Days outside that week are blank unless `history.json` has them.
 - If today falls outside `weekStart`–`weekEnd`, the workout block is labeled **Workouts** instead of **This week's workouts**.
 

@@ -4,15 +4,15 @@
   "weekStart": "2026-10-05",
   "weekEnd": "2026-10-11",
   "sample": false,
-  "updated": "2026-10-07T07:35:00+02:00",
+  "updated": "2026-10-07T11:00:00+02:00",
   "source": "todoist",
-  "percentDone": 31,
+  "percentDone": 25,
   "counts": {
-    "planned": 16,
+    "planned": 20,
     "completed": 5,
     "skipped": 0,
     "missed": 4,
-    "open": 7
+    "open": 11
   },
   "completed": [
     {
@@ -68,22 +68,41 @@
     {
       "id": "couch-to-5k",
       "name": "Couch to 5K",
+      "target": 2,
+      "done": 0,
+      "status": "planned"
+    },
+    {
+      "id": "sprints",
+      "name": "Sprints",
+      "target": 1,
+      "done": 0,
       "status": "planned"
     },
     {
       "id": "bouldering",
       "name": "Bouldering",
-      "status": "completed"
+      "target": 2,
+      "done": 1,
+      "status": "planned"
     },
     {
       "id": "abs-forearms",
       "name": "Abs / forearms",
+      "target": 2,
+      "done": 0,
       "status": "planned"
     },
     {
       "id": "yoga",
       "name": "Yoga",
+      "target": 1,
+      "done": 0,
       "status": "planned"
     }
-  ]
+  ],
+  "workoutTotal": {
+    "target": 5,
+    "done": 1
+  }
 }
