@@ -33,7 +33,7 @@ node habits.test.js
 
 The page is a phone screen: large type, a few cards, and a bottom tab bar (**Today**, **Week**, **Quit**). **Today** is the default. The chosen tab is stored in the URL hash.
 
-- **Today.** A progress ring shows how many daily habits in `data/habits-day.json` are done (`2 of 4 done`, plus the percent). Each habit is a card: icon, name, “Daily”, and a status on the right (filled check, empty circle, or Skipped). Under that, **This week's workouts** lists `habits-week.json` → `workouts` the same way, with `1 of 5 this week`. **‹ ›** move one day. Skipped items stay in the denominator and are not read as done. Fitness Bot stats are not mixed into these numbers.
+- **Today.** A progress ring shows how many daily habits in `data/habits-day.json` are done (`2 of 4 done`, plus the percent). Each habit is a card: icon, name, “Daily”, and a status on the right (filled check, empty circle, or Skipped). Under that, **This week's workouts** lists `habits-week.json` → `workouts`. A card with `target` shows a large `done / target` count and a slim bar, plus a green check once `done` reaches `target`. Without `target`, the card keeps a single status. The line under the heading is `X of Y this week`, or `Workouts N / M this week` when `workoutTotal` is present. **‹ ›** move one day. Skipped items stay in the denominator and are not read as done. Fitness Bot stats are not mixed into these numbers.
 - **Week.** Seven day cards, Monday to Sunday (`Tue 6 Oct` and `2/4`, plus a bar). Tap a day for that day’s habits. Logged sessions from `data/fitness.json` sit under the week as cards.
 - **Quit.** One card per timer in `data/quit-timers.json`. Colored outline, the name, a live `d h m s` clock, and “since quitting”. An edit button opens the start-date sheet. Restarts and edited dates stay in this browser only.
 
@@ -112,7 +112,7 @@ Skipped is drawn as a dash, never as a check and never in the done color. A resc
 
 `planned: false` means the row was not on the plan. The cell is **Not planned**. Omitted `planned` means it was planned. The page never writes a completion back.
 
-The Today ring is done ÷ planned items in the day file. The workout line uses the same ratio from `workouts`. Individual habit cards do not have bars.
+The Today ring is done ÷ planned items in the day file. Daily habit cards do not have bars. A workout card has a slim bar only when `target` is set.
 
 ### `data/habits-day.json`
 
@@ -182,10 +182,11 @@ One Monday–Sunday week in `Europe/Berlin`. `weekStart` and `weekEnd` are inclu
 ```
 
 - `counts.planned = completed + skipped + missed + open`.
-- `percentDone` may stay in the file. The “X of Y this week” line is `workouts` completed ÷ `workouts` length, not this percent, because the percent mixes daily habits and workouts.
+- `percentDone` may stay in the file. The page does not use it for the workout summary, because the percent mixes daily habits and workouts.
 - `completed`, `missed`, and `skipped` can still be written. Names already in the day file or `workouts` are not repeated. A name that appears only here is listed under “Also in the week file”. `when` is a short label, not a date the grid parses.
-- `workouts` is the weekly training list. The same `status` values as the day file. Without a per-day history entry, the workout keeps one status on the Today tab (Done, Open, Skipped, or Missed). It is not copied onto every day card, so a finished workout does not look like seven finished days.
+- `workouts` is the weekly training list. The same `status` values as the day file. Without a per-day history entry, and when `target` is omitted, the workout keeps one status on the Today tab (Done, Open, Skipped, or Missed). It is not copied onto every day card, so a finished workout does not look like seven finished days.
 - Each `workouts[]` item may have integer `target` (sessions per week) and `done` (sessions completed). Optional top-level `workoutTotal: {target, done}`.
+- When `target` is present, that workout’s card (and a Week-tab day row for the same workout) shows `done / target`, a slim bar filled to `done`, and a green check when `done` is at least `target`. The “X of Y this week” line sums `done` and `target`, capping each workout at its `target`. A workout with no `target` still counts as one, and counts as done only when `status` is `completed`. When `workoutTotal` is present, that line is the headline `Workouts N / M this week` from `workoutTotal.done` and `workoutTotal.target`.
 - Inside `weekStart`–`weekEnd`, daily habits from the day file show their real status on `habits-day.json`’s date. Later days in that week are **Upcoming** until a record exists. Days outside that week are blank unless `history.json` has them.
 - If today falls outside `weekStart`–`weekEnd`, the workout block is labeled **Workouts** instead of **This week's workouts**.
 
