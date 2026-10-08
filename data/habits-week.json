@@ -4,15 +4,15 @@
   "weekStart": "2026-10-05",
   "weekEnd": "2026-10-11",
   "sample": false,
-  "updated": "2026-10-08T07:35:00+02:00",
+  "updated": "2026-10-08T12:35:00+02:00",
   "source": "todoist",
-  "percentDone": 30,
+  "percentDone": 33,
   "counts": {
     "planned": 30,
-    "completed": 9,
+    "completed": 10,
     "skipped": 1,
     "missed": 6,
-    "open": 14
+    "open": 13
   },
   "completed": [
     {
@@ -59,6 +59,11 @@
       "id": "gym",
       "name": "Gym (evening, 20:00–21:15)",
       "when": "Wed 7 Oct"
+    },
+    {
+      "id": "vitamins-morning",
+      "name": "Morning vitamins",
+      "when": "Thu 8 Oct"
     }
   ],
   "missed": [

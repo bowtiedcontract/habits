@@ -3,12 +3,12 @@
   "timezone": "Europe/Berlin",
   "date": "2026-10-08",
   "sample": false,
-  "updated": "2026-10-08T07:35:00+02:00",
+  "updated": "2026-10-08T12:35:00+02:00",
   "source": "todoist",
   "items": [
     {
       "id": "german",
-      "name": "German (Anki + Pimsleur)",
+      "name": "German (Pimsleur done, Anki pending)",
       "planned": true,
       "status": "planned"
     },
@@ -16,7 +16,7 @@
       "id": "vitamins-morning",
       "name": "Morning vitamins",
       "planned": true,
-      "status": "planned"
+      "status": "completed"
     },
     {
       "id": "vitamins-evening",
