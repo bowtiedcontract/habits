@@ -4,15 +4,15 @@
   "weekStart": "2026-10-05",
   "weekEnd": "2026-10-11",
   "sample": false,
-  "updated": "2026-10-07T22:35:00+02:00",
+  "updated": "2026-10-08T07:35:00+02:00",
   "source": "todoist",
-  "percentDone": 35,
+  "percentDone": 30,
   "counts": {
-    "planned": 26,
+    "planned": 30,
     "completed": 9,
     "skipped": 1,
-    "missed": 4,
-    "open": 12
+    "missed": 6,
+    "open": 14
   },
   "completed": [
     {
@@ -81,6 +81,16 @@
       "id": "vitamins-evening",
       "name": "Evening vitamins",
       "when": "Tue 6 Oct"
+    },
+    {
+      "id": "german",
+      "name": "German (Anki done, Pimsleur not ticked)",
+      "when": "Wed 7 Oct"
+    },
+    {
+      "id": "vitamins-morning",
+      "name": "Morning vitamins",
+      "when": "Wed 7 Oct"
     }
   ],
   "skipped": [
