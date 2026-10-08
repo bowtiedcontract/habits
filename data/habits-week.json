@@ -4,13 +4,13 @@
   "weekStart": "2026-10-05",
   "weekEnd": "2026-10-11",
   "sample": false,
-  "updated": "2026-10-08T12:35:00+02:00",
+  "updated": "2026-10-08T23:15:00+02:00",
   "source": "todoist",
-  "percentDone": 33,
+  "percentDone": 31,
   "counts": {
-    "planned": 30,
+    "planned": 32,
     "completed": 10,
-    "skipped": 1,
+    "skipped": 3,
     "missed": 6,
     "open": 13
   },
@@ -103,6 +103,16 @@
       "id": "couch-to-5k",
       "name": "Couch to 5K makeup run (tired)",
       "when": "Wed 7 Oct"
+    },
+    {
+      "id": "gym",
+      "name": "Gym (06:00)",
+      "when": "Thu 8 Oct"
+    },
+    {
+      "id": "bouldering",
+      "name": "Bouldering (17:00, at the tailor)",
+      "when": "Thu 8 Oct"
     }
   ],
   "workouts": [
