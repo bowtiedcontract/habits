@@ -4,15 +4,15 @@
   "weekStart": "2026-10-05",
   "weekEnd": "2026-10-11",
   "sample": false,
-  "updated": "2026-10-09T07:35:00+02:00",
+  "updated": "2026-10-09T12:30:00+02:00",
   "source": "todoist",
-  "percentDone": 32,
+  "percentDone": 38,
   "counts": {
     "planned": 34,
-    "completed": 11,
+    "completed": 13,
     "skipped": 3,
     "missed": 8,
-    "open": 12
+    "open": 10
   },
   "completed": [
     { "id": "vitamins-morning", "name": "Morning vitamins", "when": "Mon 5 Oct" },
@@ -25,7 +25,9 @@
     { "id": "vitamins-evening", "name": "Evening vitamins", "when": "Wed 7 Oct" },
     { "id": "gym", "name": "Gym (evening, 20:00–21:15)", "when": "Wed 7 Oct" },
     { "id": "vitamins-morning", "name": "Morning vitamins", "when": "Thu 8 Oct" },
-    { "id": "vitamins-evening", "name": "Evening vitamins", "when": "Thu 8 Oct" }
+    { "id": "vitamins-evening", "name": "Evening vitamins", "when": "Thu 8 Oct" },
+    { "id": "vitamins-morning", "name": "Morning vitamins", "when": "Fri 9 Oct" },
+    { "id": "investing", "name": "Investing check", "when": "Fri 9 Oct" }
   ],
   "missed": [
     { "id": "german", "name": "German (Pimsleur done, Anki not ticked)", "when": "Mon 5 Oct" },

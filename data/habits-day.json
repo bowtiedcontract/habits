@@ -3,12 +3,12 @@
   "timezone": "Europe/Berlin",
   "date": "2026-10-09",
   "sample": false,
-  "updated": "2026-10-09T07:35:00+02:00",
+  "updated": "2026-10-09T12:30:00+02:00",
   "source": "todoist",
   "items": [
     { "id": "german", "name": "German (Anki + Pimsleur)", "planned": true, "status": "planned" },
-    { "id": "vitamins-morning", "name": "Morning vitamins", "planned": true, "status": "planned" },
+    { "id": "vitamins-morning", "name": "Morning vitamins", "planned": true, "status": "completed" },
     { "id": "vitamins-evening", "name": "Evening vitamins", "planned": true, "status": "planned" },
-    { "id": "investing", "name": "Investing check", "planned": true, "status": "planned" }
+    { "id": "investing", "name": "Investing check", "planned": true, "status": "completed" }
   ]
 }
