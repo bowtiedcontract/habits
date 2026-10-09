@@ -4,160 +4,52 @@
   "weekStart": "2026-10-05",
   "weekEnd": "2026-10-11",
   "sample": false,
-  "updated": "2026-10-08T23:15:00+02:00",
+  "updated": "2026-10-09T07:35:00+02:00",
   "source": "todoist",
-  "percentDone": 31,
+  "percentDone": 32,
   "counts": {
-    "planned": 32,
-    "completed": 10,
+    "planned": 34,
+    "completed": 11,
     "skipped": 3,
-    "missed": 6,
-    "open": 13
+    "missed": 8,
+    "open": 12
   },
   "completed": [
-    {
-      "id": "vitamins-morning",
-      "name": "Morning vitamins",
-      "when": "Mon 5 Oct"
-    },
-    {
-      "id": "vitamins-evening",
-      "name": "Evening vitamins",
-      "when": "Mon 5 Oct"
-    },
-    {
-      "id": "bouldering",
-      "name": "Bouldering (Monday climb)",
-      "when": "Mon 5 Oct"
-    },
-    {
-      "id": "vitamins-morning",
-      "name": "Morning vitamins",
-      "when": "Tue 6 Oct"
-    },
-    {
-      "id": "investing",
-      "name": "Investing check",
-      "when": "Tue 6 Oct"
-    },
-    {
-      "id": "yoga",
-      "name": "Yoga (Little Big Ganesha, 18:00)",
-      "when": "Wed 7 Oct"
-    },
-    {
-      "id": "investing",
-      "name": "Investing check",
-      "when": "Wed 7 Oct"
-    },
-    {
-      "id": "vitamins-evening",
-      "name": "Evening vitamins",
-      "when": "Wed 7 Oct"
-    },
-    {
-      "id": "gym",
-      "name": "Gym (evening, 20:00–21:15)",
-      "when": "Wed 7 Oct"
-    },
-    {
-      "id": "vitamins-morning",
-      "name": "Morning vitamins",
-      "when": "Thu 8 Oct"
-    }
+    { "id": "vitamins-morning", "name": "Morning vitamins", "when": "Mon 5 Oct" },
+    { "id": "vitamins-evening", "name": "Evening vitamins", "when": "Mon 5 Oct" },
+    { "id": "bouldering", "name": "Bouldering (Monday climb)", "when": "Mon 5 Oct" },
+    { "id": "vitamins-morning", "name": "Morning vitamins", "when": "Tue 6 Oct" },
+    { "id": "investing", "name": "Investing check", "when": "Tue 6 Oct" },
+    { "id": "yoga", "name": "Yoga (Little Big Ganesha, 18:00)", "when": "Wed 7 Oct" },
+    { "id": "investing", "name": "Investing check", "when": "Wed 7 Oct" },
+    { "id": "vitamins-evening", "name": "Evening vitamins", "when": "Wed 7 Oct" },
+    { "id": "gym", "name": "Gym (evening, 20:00–21:15)", "when": "Wed 7 Oct" },
+    { "id": "vitamins-morning", "name": "Morning vitamins", "when": "Thu 8 Oct" },
+    { "id": "vitamins-evening", "name": "Evening vitamins", "when": "Thu 8 Oct" }
   ],
   "missed": [
-    {
-      "id": "german",
-      "name": "German (Pimsleur done, Anki not ticked)",
-      "when": "Mon 5 Oct"
-    },
-    {
-      "id": "investing",
-      "name": "Investing check",
-      "when": "Mon 5 Oct"
-    },
-    {
-      "id": "german",
-      "name": "German (Anki + Pimsleur)",
-      "when": "Tue 6 Oct"
-    },
-    {
-      "id": "vitamins-evening",
-      "name": "Evening vitamins",
-      "when": "Tue 6 Oct"
-    },
-    {
-      "id": "german",
-      "name": "German (Anki done, Pimsleur not ticked)",
-      "when": "Wed 7 Oct"
-    },
-    {
-      "id": "vitamins-morning",
-      "name": "Morning vitamins",
-      "when": "Wed 7 Oct"
-    }
+    { "id": "german", "name": "German (Pimsleur done, Anki not ticked)", "when": "Mon 5 Oct" },
+    { "id": "investing", "name": "Investing check", "when": "Mon 5 Oct" },
+    { "id": "german", "name": "German (Anki + Pimsleur)", "when": "Tue 6 Oct" },
+    { "id": "vitamins-evening", "name": "Evening vitamins", "when": "Tue 6 Oct" },
+    { "id": "german", "name": "German (Anki done, Pimsleur not ticked)", "when": "Wed 7 Oct" },
+    { "id": "vitamins-morning", "name": "Morning vitamins", "when": "Wed 7 Oct" },
+    { "id": "german", "name": "German (Pimsleur done, Anki not ticked)", "when": "Thu 8 Oct" },
+    { "id": "investing", "name": "Investing check", "when": "Thu 8 Oct" }
   ],
   "skipped": [
-    {
-      "id": "couch-to-5k",
-      "name": "Couch to 5K makeup run (tired)",
-      "when": "Wed 7 Oct"
-    },
-    {
-      "id": "gym",
-      "name": "Gym (06:00)",
-      "when": "Thu 8 Oct"
-    },
-    {
-      "id": "bouldering",
-      "name": "Bouldering (17:00, at the tailor)",
-      "when": "Thu 8 Oct"
-    }
+    { "id": "couch-to-5k", "name": "Couch to 5K makeup run (tired)", "when": "Wed 7 Oct" },
+    { "id": "gym", "name": "Gym (06:00)", "when": "Thu 8 Oct" },
+    { "id": "bouldering", "name": "Bouldering (17:00, at the tailor)", "when": "Thu 8 Oct" }
   ],
   "workouts": [
-    {
-      "id": "gym",
-      "name": "Gym",
-      "target": 5,
-      "done": 1,
-      "status": "planned"
-    },
-    {
-      "id": "couch-to-5k",
-      "name": "Couch to 5K",
-      "target": 2,
-      "done": 0,
-      "status": "planned"
-    },
-    {
-      "id": "sprints",
-      "name": "Sprints",
-      "target": 1,
-      "done": 0,
-      "status": "planned"
-    },
-    {
-      "id": "bouldering",
-      "name": "Bouldering",
-      "target": 2,
-      "done": 1,
-      "status": "planned"
-    },
-    {
-      "id": "abs-forearms",
-      "name": "Abs / forearms",
-      "target": 2,
-      "done": 0,
-      "status": "planned"
-    },
-    {
-      "id": "yoga",
-      "name": "Yoga",
-      "target": 1,
-      "done": 1,
-      "status": "completed"
-    }
+    { "id": "gym", "name": "Gym", "target": 5, "done": 1, "status": "planned" },
+    { "id": "couch-to-5k", "name": "Couch to 5K", "target": 2, "done": 0, "status": "planned" },
+    { "id": "sprints", "name": "Sprints", "target": 1, "done": 0, "status": "planned" },
+    { "id": "bouldering", "name": "Bouldering", "target": 2, "done": 1, "status": "planned" },
+    { "id": "abs-forearms", "name": "Abs / forearms", "target": 2, "done": 0, "status": "planned" },
+    { "id": "yoga", "name": "Yoga", "target": 1, "done": 1, "status": "completed" },
+    { "id": "grip", "name": "Grip training", "target": 1, "done": 0, "status": "planned" }
   ],
   "workoutTotal": {
     "target": 5,
