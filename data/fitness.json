@@ -1,33 +1,16 @@
 {
   "schemaVersion": 1,
-  "updated": "2026-10-07T20:55:00+02:00",
+  "updated": "2026-10-11T20:00:00+02:00",
   "weekOf": "2026-10-05",
-  "sundayRecap": "",
+  "sundayRecap": "Three of 13 target sessions got done this week: a Monday climb, Wednesday yoga and a Wednesday evening gym session. Nothing was ticked from Friday on, so next week is reset to the full plan starting with Monday's 05:00 gym.",
   "stats": [
-    {
-      "label": "Workouts done",
-      "value": "3"
-    },
-    {
-      "label": "Skipped",
-      "value": "2"
-    }
+    { "label": "Workouts done", "value": "3" },
+    { "label": "Skipped", "value": "6" },
+    { "label": "Not logged (Fri–Sun)", "value": "6" }
   ],
   "workouts": [
-    {
-      "date": "2026-10-05",
-      "name": "Bouldering",
-      "detail": "Unplanned, 17:10–18:10 (60 min)."
-    },
-    {
-      "date": "2026-10-07",
-      "name": "Yoga",
-      "detail": "Little Big Ganesha with Tori, 18:00–19:30."
-    },
-    {
-      "date": "2026-10-07",
-      "name": "Gym",
-      "detail": "Evening session, 20:00–21:15 (75 min)."
-    }
+    { "date": "2026-10-05", "name": "Bouldering", "detail": "Unplanned, 17:10–18:10 (60 min)." },
+    { "date": "2026-10-07", "name": "Yoga", "detail": "Little Big Ganesha with Tori, 18:00–19:30." },
+    { "date": "2026-10-07", "name": "Gym", "detail": "Evening session, 20:00–21:15 (75 min)." }
   ]
 }
