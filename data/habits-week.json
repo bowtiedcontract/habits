@@ -4,22 +4,17 @@
   "weekStart": "2026-10-12",
   "weekEnd": "2026-10-18",
   "sample": false,
-  "updated": "2026-10-13T17:40:00+02:00",
+  "updated": "2026-10-13T22:26:00+02:00",
   "source": "todoist",
-  "percentDone": 8,
+  "percentDone": 6,
   "counts": {
     "planned": 36,
-    "completed": 3,
+    "completed": 2,
     "skipped": 0,
-    "missed": 4,
+    "missed": 5,
     "open": 29
   },
   "completed": [
-    {
-      "id": "investing",
-      "name": "Investing check",
-      "when": "Mon 12 Oct"
-    },
     {
       "id": "grip",
       "name": "Grip training (office, 11:00)",
@@ -50,6 +45,11 @@
     {
       "id": "gym",
       "name": "Gym (05:00)",
+      "when": "Mon 12 Oct"
+    },
+    {
+      "id": "investing",
+      "name": "Investing check",
       "when": "Mon 12 Oct"
     }
   ],
