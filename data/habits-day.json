@@ -1,14 +1,14 @@
 {
   "schemaVersion": 1,
   "timezone": "Europe/Berlin",
-  "date": "2026-10-13",
+  "date": "2026-10-14",
   "sample": false,
-  "updated": "2026-10-13T22:26:00+02:00",
+  "updated": "2026-10-14T07:34:00+02:00",
   "source": "todoist",
   "items": [
     {
       "id": "german",
-      "name": "German (Anki done, Pimsleur pending)",
+      "name": "German (Anki/Pimsleur)",
       "planned": true,
       "status": "planned"
     },
@@ -28,7 +28,7 @@
       "id": "investing",
       "name": "Investing check",
       "planned": true,
-      "status": "completed"
+      "status": "planned"
     }
   ]
 }

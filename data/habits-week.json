@@ -4,15 +4,15 @@
   "weekStart": "2026-10-12",
   "weekEnd": "2026-10-18",
   "sample": false,
-  "updated": "2026-10-13T22:26:00+02:00",
+  "updated": "2026-10-14T07:34:00+02:00",
   "source": "todoist",
-  "percentDone": 6,
+  "percentDone": 11,
   "counts": {
     "planned": 36,
-    "completed": 2,
+    "completed": 4,
     "skipped": 0,
-    "missed": 5,
-    "open": 29
+    "missed": 8,
+    "open": 24
   },
   "completed": [
     {
@@ -24,6 +24,16 @@
       "id": "investing",
       "name": "Investing check",
       "when": "Tue 13 Oct"
+    },
+    {
+      "id": "german",
+      "name": "German (Anki + Pimsleur)",
+      "when": "Tue 13 Oct"
+    },
+    {
+      "id": "gym",
+      "name": "Gym (05:30–07:10)",
+      "when": "Wed 14 Oct"
     }
   ],
   "missed": [
@@ -51,6 +61,21 @@
       "id": "investing",
       "name": "Investing check",
       "when": "Mon 12 Oct"
+    },
+    {
+      "id": "vitamins-morning",
+      "name": "Morning vitamins",
+      "when": "Tue 13 Oct"
+    },
+    {
+      "id": "vitamins-evening",
+      "name": "Evening vitamins",
+      "when": "Tue 13 Oct"
+    },
+    {
+      "id": "gym",
+      "name": "Gym (05:00)",
+      "when": "Tue 13 Oct"
     }
   ],
   "skipped": [],
@@ -59,7 +84,7 @@
       "id": "gym",
       "name": "Gym",
       "target": 3,
-      "done": 0,
+      "done": 1,
       "status": "planned"
     },
     {
@@ -107,7 +132,7 @@
   ],
   "workoutTotal": {
     "target": 3,
-    "done": 0,
+    "done": 1,
     "label": "Gym sessions"
   }
 }
