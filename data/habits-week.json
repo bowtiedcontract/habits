@@ -4,15 +4,15 @@
   "weekStart": "2026-10-12",
   "weekEnd": "2026-10-18",
   "sample": false,
-  "updated": "2026-10-14T07:34:00+02:00",
+  "updated": "2026-10-14T12:34:00+02:00",
   "source": "todoist",
-  "percentDone": 11,
+  "percentDone": 12,
   "counts": {
-    "planned": 36,
-    "completed": 4,
+    "planned": 41,
+    "completed": 5,
     "skipped": 0,
     "missed": 8,
-    "open": 24
+    "open": 28
   },
   "completed": [
     {
@@ -33,6 +33,11 @@
     {
       "id": "gym",
       "name": "Gym (05:30–07:10)",
+      "when": "Wed 14 Oct"
+    },
+    {
+      "id": "meditation",
+      "name": "Meditate 15 min (07:30–07:45)",
       "when": "Wed 14 Oct"
     }
   ],

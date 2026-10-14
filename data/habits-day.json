@@ -3,7 +3,7 @@
   "timezone": "Europe/Berlin",
   "date": "2026-10-14",
   "sample": false,
-  "updated": "2026-10-14T07:34:00+02:00",
+  "updated": "2026-10-14T12:34:00+02:00",
   "source": "todoist",
   "items": [
     {
@@ -29,6 +29,12 @@
       "name": "Investing check",
       "planned": true,
       "status": "planned"
+    },
+    {
+      "id": "meditation",
+      "name": "Meditate 15 min",
+      "planned": true,
+      "status": "completed"
     }
   ]
 }
