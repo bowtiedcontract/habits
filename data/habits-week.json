@@ -4,15 +4,15 @@
   "weekStart": "2026-10-12",
   "weekEnd": "2026-10-18",
   "sample": false,
-  "updated": "2026-10-15T07:35:00+02:00",
+  "updated": "2026-10-15T17:28:00+02:00",
   "source": "todoist",
-  "percentDone": 15,
+  "percentDone": 17,
   "counts": {
     "planned": 41,
-    "completed": 6,
+    "completed": 7,
     "skipped": 0,
     "missed": 13,
-    "open": 22
+    "open": 21
   },
   "completed": [
     {
@@ -44,6 +44,11 @@
       "id": "yoga",
       "name": "Yoga (18:00–19:30)",
       "when": "Wed 14 Oct"
+    },
+    {
+      "id": "gym",
+      "name": "Gym (06:30–08:00)",
+      "when": "Thu 15 Oct"
     }
   ],
   "missed": [
@@ -119,7 +124,7 @@
       "id": "gym",
       "name": "Gym",
       "target": 3,
-      "done": 1,
+      "done": 2,
       "status": "planned"
     },
     {
@@ -167,7 +172,7 @@
   ],
   "workoutTotal": {
     "target": 3,
-    "done": 1,
+    "done": 2,
     "label": "Gym sessions"
   }
 }
