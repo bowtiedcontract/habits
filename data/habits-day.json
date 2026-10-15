@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "timezone": "Europe/Berlin",
-  "date": "2026-10-14",
+  "date": "2026-10-15",
   "sample": false,
-  "updated": "2026-10-14T22:28:00+02:00",
+  "updated": "2026-10-15T07:35:00+02:00",
   "source": "todoist",
   "items": [
     {
@@ -34,7 +34,7 @@
       "id": "meditation",
       "name": "Meditate 15 min",
       "planned": true,
-      "status": "completed"
+      "status": "planned"
     }
   ]
 }
