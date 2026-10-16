@@ -4,15 +4,15 @@
   "weekStart": "2026-10-12",
   "weekEnd": "2026-10-18",
   "sample": false,
-  "updated": "2026-10-15T17:28:00+02:00",
+  "updated": "2026-10-16T07:33:00+02:00",
   "source": "todoist",
   "percentDone": 17,
   "counts": {
     "planned": 41,
     "completed": 7,
     "skipped": 0,
-    "missed": 13,
-    "open": 21
+    "missed": 18,
+    "open": 16
   },
   "completed": [
     {
@@ -116,6 +116,31 @@
       "id": "grip",
       "name": "Grip training (office, 11:00)",
       "when": "Wed 14 Oct"
+    },
+    {
+      "id": "german",
+      "name": "German (Anki/Pimsleur not ticked)",
+      "when": "Thu 15 Oct"
+    },
+    {
+      "id": "vitamins-morning",
+      "name": "Morning vitamins",
+      "when": "Thu 15 Oct"
+    },
+    {
+      "id": "vitamins-evening",
+      "name": "Evening vitamins",
+      "when": "Thu 15 Oct"
+    },
+    {
+      "id": "investing",
+      "name": "Investing check",
+      "when": "Thu 15 Oct"
+    },
+    {
+      "id": "meditation",
+      "name": "Meditate 15 min",
+      "when": "Thu 15 Oct"
     }
   ],
   "skipped": [],
