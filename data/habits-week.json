@@ -4,15 +4,15 @@
   "weekStart": "2026-10-12",
   "weekEnd": "2026-10-18",
   "sample": false,
-  "updated": "2026-10-16T07:33:00+02:00",
+  "updated": "2026-10-17T07:30:00+02:00",
   "source": "todoist",
   "percentDone": 17,
   "counts": {
-    "planned": 41,
+    "planned": 42,
     "completed": 7,
     "skipped": 0,
-    "missed": 18,
-    "open": 16
+    "missed": 25,
+    "open": 10
   },
   "completed": [
     {
@@ -141,6 +141,41 @@
       "id": "meditation",
       "name": "Meditate 15 min",
       "when": "Thu 15 Oct"
+    },
+    {
+      "id": "german",
+      "name": "German (not ticked)",
+      "when": "Fri 16 Oct"
+    },
+    {
+      "id": "vitamins-morning",
+      "name": "Morning vitamins",
+      "when": "Fri 16 Oct"
+    },
+    {
+      "id": "vitamins-evening",
+      "name": "Evening vitamins",
+      "when": "Fri 16 Oct"
+    },
+    {
+      "id": "investing",
+      "name": "Investing check",
+      "when": "Fri 16 Oct"
+    },
+    {
+      "id": "meditation",
+      "name": "Meditate 15 min",
+      "when": "Fri 16 Oct"
+    },
+    {
+      "id": "grip",
+      "name": "Grip training (office, 11:00)",
+      "when": "Fri 16 Oct"
+    },
+    {
+      "id": "couch-to-5k",
+      "name": "Couch to 5K easy run (17:00)",
+      "when": "Fri 16 Oct"
     }
   ],
   "skipped": [],
@@ -157,7 +192,7 @@
       "name": "Couch to 5K",
       "target": 1,
       "done": 0,
-      "status": "planned"
+      "status": "missed"
     },
     {
       "id": "sprints",
@@ -192,7 +227,7 @@
       "name": "Grip training",
       "target": 3,
       "done": 1,
-      "status": "planned"
+      "status": "missed"
     }
   ],
   "workoutTotal": {
